@@ -12,9 +12,6 @@ contract User {
         template = Template(_template);
     }
 
-    function clone(bytes memory data) public {
-        template.clone(data);
-    }
 }
 
 contract TemplateTest is DSTest {

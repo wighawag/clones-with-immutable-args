@@ -3,14 +3,14 @@
 pragma solidity ^0.8.0;
 import "ds-test/test.sol";
 
-contract ClonesWithImmutableArgs is DSTest {
-  
-  function clone(address implementation, bytes memory data)
+contract ClonesWithCallData is DSTest {
+ 
+  function cloneWithCallDataProvision(address implementation, bytes memory data)
     internal
     returns (address instance)
   {
     uint256 extraLength = data.length;
-    uint256 creationSize = 0x38 + extraLength;
+    uint256 creationSize = 0x43 + extraLength;
     uint256 runSize = creationSize - 11;
     uint256 dataPtr;
     uint256 ptr;
@@ -49,17 +49,39 @@ contract ClonesWithImmutableArgs is DSTest {
       // 3d  	       | RETURNDATASIZE	       | 0 cds	                  | –
       // 3d	         | RETURNDATASIZE	       | 0 0 cds	                | –
       // 37	         | CALLDATACOPY	         | –                        | [0, cds] = calldata
+      // 61	         | PUSH2 extra           | extra	                  | [0, cds] = calldata
+       mstore(
+        add(ptr, 0x0b),
+        0x363d3d3761000000000000000000000000000000000000000000000000000000
+      )
+      mstore(
+        add(ptr, 0x10),
+        shl(240, extraLength)
+      )
+
+      // 60	0x38     | PUSH1 0x38            | 0x38 extra               | [0, cds] = calldata // 0x38 (56) is runtime size - data
+      // 36	         | CALLDATASIZE	         | cds 0x38 extra           | [0, cds] = calldata
+      // 39          | CODECOPY              | _                        | [0, cds] = calldata
       // 3d	         | RETURNDATASIZE	       | 0	                      | [0, cds] = calldata
       // 3d	         | RETURNDATASIZE	       | 0 0	                    | [0, cds] = calldata
       // 3d	         | RETURNDATASIZE	       | 0 0 0	                  | [0, cds] = calldata
       // 36	         | CALLDATASIZE	         | cds 0 0 0	              | [0, cds] = calldata
+      // 61 extra    | PUSH2 extra           | extra cds 0 0 0          | [0, cds] = calldata
+     
+      mstore(
+        add(ptr, 0x12),
+        0x603836393d3d3d36610000000000000000000000000000000000000000000000
+      )
+       mstore(
+        add(ptr, 0x1b),
+        shl(240, extraLength)
+      )
+
+      // 01          | ADD                   | cds+extra 0 0 0          | [0, cds] = calldata
       // 3d	         | RETURNDATASIZE	       | 0 cds 0 0 0	            | [0, cds] = calldata
       // 73 addr	   | PUSH20 0x123…	       | addr 0 cds 0 0 0	        | [0, cds] = calldata
-      mstore(
-        add(ptr, 0x0b),
-        0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000
-      )
-      mstore(add(ptr, 0x15), shl(0x60, implementation))
+      mstore(add(ptr, 0x1d), 0x013d7300000000000000000000000000000000000000000000000000000000)
+      mstore(add(ptr, 0x20), shl(0x60, implementation))
 
 
       // 5a	         | GAS	                 | gas addr 0 cds 0 0 0	    | [0, cds] = calldata
@@ -71,15 +93,15 @@ contract ClonesWithImmutableArgs is DSTest {
       // 90	         | SWAP1	               | 0 success	              | [0, rds] = return data
       // 3d	         | RETURNDATASIZE        | rds 0 success	          | [0, rds] = return data
       // 91          | SWAP2	               | success 0 rds	          | [0, rds] = return data
-      // 60 dest	   | PUSH1 dest            | dest sucess 0 rds	      | [0, rds] = return data
+      // 60 0x36	   | PUSH1 0x36            | 0x36 sucess 0 rds	      | [0, rds] = return data
       // 57	         | JUMPI	               | 0 rds	                  | [0, rds] = return data
       // fd	         | REVERT	               | –	                      | [0, rds] = return data
       // 5b	         | JUMPDEST	             | 0 rds	                  | [0, rds] = return data
       // f3	         | RETURN	               | –	                      | [0, rds] = return data
 
       mstore(
-        add(ptr, 0x29),
-        0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000
+        add(ptr, 0x34),
+        0x5af43d82803e903d91603657fd5bf30000000000000000000000000000000000
       )
     }
 
@@ -88,7 +110,7 @@ contract ClonesWithImmutableArgs is DSTest {
     // APPENDED DATA (Accessible from extcodecopy)
     // -------------------------------------------------------------------------------------------------------------
 
-    uint256 copyPtr = ptr + 0x38;
+    uint256 copyPtr = ptr + 0x43;
     assembly {
       dataPtr := add(data, 32)
     }
@@ -103,6 +125,7 @@ contract ClonesWithImmutableArgs is DSTest {
     assembly {
       mstore(copyPtr, and(mload(dataPtr), mask))
     }
+
     assembly {
       instance := create(0, ptr, creationSize)
     }
