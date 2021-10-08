@@ -16,9 +16,9 @@ contract User {
         greeter.greet(greeting);
     }
 
-    function gm() public {
-        greeter.gm();
-    }
+    // function gm() public {
+    //     greeter.gm();
+    // }
 }
 
 contract GreeterTest is DSTest {
@@ -35,6 +35,6 @@ contract GreeterTest is DSTest {
         greeter = new Greeter();
         alice = new User(address(greeter));
         bob = new User(address(greeter));
-        greeter.transferOwnership(address(alice));
+        // greeter.transferOwnership(address(alice));
     }
 }

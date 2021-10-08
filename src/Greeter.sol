@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+// import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Cloning.sol";
 
 library Errors {
     string internal constant InvalidBlockNumber =
@@ -9,13 +10,10 @@ library Errors {
     string internal constant CannotGm = "cannot greet with gm";
 }
 
-contract Greeter is Ownable {
+contract Greeter {
     string public greeting;
 
-    function gm() public onlyOwner {
-        require(block.number % 10 == 0, Errors.InvalidBlockNumber);
-        greeting = "gm";
-    }
+    event Cloned(Greeter clone, uint256 d);
 
     function greet(string memory _greeting) public {
         require(
@@ -23,5 +21,21 @@ contract Greeter is Ownable {
             Errors.CannotGm
         );
         greeting = _greeting;
+    }
+
+    function clone(uint256 data) external returns (Greeter clonedGreeter) {
+        clonedGreeter = Greeter(ClonesWithArgs.clone2(address(this), bytes32(data)));
+        uint256 d = clonedGreeter.getData();
+        emit Cloned(clonedGreeter, d);
+    }
+
+    function getData() external pure returns (uint256) {
+        return _lastAppendedDataAsUint256();
+    }
+
+    function _lastAppendedDataAsUint256() internal pure virtual returns (uint256 data) {
+        assembly {
+            data := calldataload(sub(calldatasize(), 32))
+        }
     }
 }
