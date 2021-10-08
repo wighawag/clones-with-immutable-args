@@ -132,6 +132,7 @@ contract ClonesWithCallData is DSTest {
       mstore(copyPtr, and(mload(dataPtr), mask))
     }
     copyPtr += (32 - counter);
+     // solhint-disable-next-line no-inline-assembly
     assembly {
       mstore(copyPtr, shl(240, extraLength))
     }
