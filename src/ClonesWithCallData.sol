@@ -108,6 +108,7 @@ contract ClonesWithCallData is DSTest {
 
     // -------------------------------------------------------------------------------------------------------------
     // APPENDED DATA (Accessible from extcodecopy)
+    // (but also send as appended data to the delegatecall)
     // -------------------------------------------------------------------------------------------------------------
 
     extraLength -= 2;
