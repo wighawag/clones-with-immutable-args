@@ -233,25 +233,25 @@ contract ClonesWithArgs is DSTest {
     function clone3b(address implementation, bytes memory data) internal returns (address instance) {
         
         uint256 extraLength = data.length;
-        uint256 creationSize = 0x37 + extraLength;
-        uint256 runSize = creationSize - 10;
+        uint256 creationSize = 0x38 + extraLength;
+        uint256 runSize = creationSize - 11;
         uint256 dataPtr;
         uint256 ptr;
         assembly {
             ptr := mload(0x40)
            
-            mstore(ptr, 0x3d60000000000000000000000000000000000000000000000000000000000000)
-            // TODO for now : PUSH1 (0x60)
-            mstore(add(ptr, 0x02), shl(248, runSize)) // size of the contract running bytecode  // TODO support bigger
-            mstore(add(ptr, 0x03), 0x80600a3d3981f300000000000000000000000000000000000000000000000000)
+            mstore(ptr, 0x3d61000000000000000000000000000000000000000000000000000000000000)
+            // TODO for now : PUSH2 (0x61), do push20 ?
+            mstore(add(ptr, 0x02), shl(240, runSize)) // size of the contract running bytecode  // TODO support bigger
+            mstore(add(ptr, 0x04), 0x80600b3d3981f300000000000000000000000000000000000000000000000000)
 
-            mstore(add(ptr, 0x0a), 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
-            mstore(add(ptr, 0x14), shl(0x60, implementation))
+            mstore(add(ptr, 0x0b), 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(ptr, 0x15), shl(0x60, implementation))
         
-            mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+            mstore(add(ptr, 0x29), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
         }
 
-        uint256 copyPtr = ptr + 0x37;
+        uint256 copyPtr = ptr + 0x38;
         assembly {
             dataPtr := add(data, 32)
         }
@@ -262,19 +262,15 @@ contract ClonesWithArgs is DSTest {
             copyPtr += 32;
             dataPtr += 32;
         }
+        uint256 mask = ~(256 ** (32 - extraLength) - 1);
         assembly {
-            mstore(copyPtr, and(mload(dataPtr), 0x0000000000000000000000000000000000000000000000000000000000000000))
+            mstore(copyPtr, and(mload(dataPtr), mask))
         }
         assembly {
             instance := create(0, ptr, creationSize)
         }
         require(instance != address(0), "ERC1167: create failed");
     }
-
-    // mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
-    // mstore(add(ptr, 0x14), shl(0x60, implementation))
-    // mstore(add(ptr, 0x28), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
-    // instance := create(0, ptr, 0x37)
 
     function clone3(address implementation, bytes memory data) internal returns (address instance) {
 
