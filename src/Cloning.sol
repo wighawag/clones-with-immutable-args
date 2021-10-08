@@ -153,7 +153,7 @@ library ClonesWithArgs {
             */
             mstore(add(ptr, 0x0a), 0x363d3d377f000000000000000000000000000000000000000000000000000000)
             mstore(add(ptr, 0x0f), data)
-            // mstore(add(ptr, 0x2f), 0x3652000000000000000000000000000000000000000000000000000000000000)
+            mstore(add(ptr, 0x2f), 0x3652000000000000000000000000000000000000000000000000000000000000)
 
             /*
                 3d	    | RETURNDATASIZE	    | 0	                        | [0, cds + 0x20] = data
@@ -168,13 +168,10 @@ library ClonesWithArgs {
                 f4	    | DELEGATECALL	        | success 0	                | [0, cds + 0x20] = data
             */
             
-            // mstore(add(ptr, 0x31), 0x3d3d3d3678000000000000000000000000000000000000000000000000000000)
+            mstore(add(ptr, 0x31), 0x3d3d3d3678000000000000000000000000000000000000000000000000000000)
             // write data size
-
-            // mstore(add(ptr, 0x36), shl(0x07, 0x20))
-            // TODO remove:
-            mstore(add(ptr, 0x2f), 0x36523d3d3d367800000000000000000000000000000000000000000000000020)
-           
+            mstore(add(ptr, 0x36), shl(0x38, 0x20)) // 0x38 = 7 * 8bits
+            
             mstore(add(ptr, 0x4f), 0x013d730000000000000000000000000000000000000000000000000000000000)
             mstore(add(ptr, 0x52), shl(0x60, implementation))
 
