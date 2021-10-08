@@ -25,21 +25,28 @@ contract TemplateTestSuite is TemplateTest {
     function testCloneWithCallDataProvision() public {
         string memory message = "dsaldj asdkasjdklsahfk jhdjkhsasajhdjsahdjksahd jksajdhsajdksajdh sajdhaks kjashdkjah sdjsahdjsahdjksah djkhsajd hsajdhsajdhsa jdhsjadhjsa dhjsahdj shdjsah djksahdjsah dsajdhsajdhkjashdjsa dhjsahd jshdjsah djsahd jsahdjsahdjsahd jsahdjsa hdsajhd jsahdjsahdj sdhjashdj sahdjaks hdjsahdjsa hdjsahdjsahdjsahdjhsa jdhsajdhkjashdkj ashjdkhsajdhasjdhja ssad ashdjsahdjsahjdhsajdhsajdhsakhdjsahdjksahdjkhsa ";
         Template clone = template.clone2(bytes(message));
+        
+        bytes memory b = clone.getDataWithCallDataProvision();
+        emit log_named_bytes("BYTES", b);
+        assertEq0(bytes(message), b);
+    }
 
-        // bytes memory b = clone.getAppendedCallData();
-        // emit log_named_bytes("BYTES", b);
-        // assertEq0(bytes(message), b);
+        function testCloneWithCallDataProvisionCallData() public {
+        string memory message = "dsaldj asdkasjdklsahfk jhdjkhsasajhdjsahdjksahd jksajdhsajdksajdh sajdhaks kjashdkjah sdjsahdjsahdjksah djkhsajd hsajdhsajdhsa jdhsjadhjsa dhjsahdj shdjsah djksahdjsah dsajdhsajdhkjashdjsa dhjsahd jshdjsah djsahd jsahdjsahdjsahd jsahdjsa hdsajhd jsahdjsahdj sdhjashdj sahdjaks hdjsahdjsa hdjsahdjsahdjsahdjhsa jdhsajdhkjashdkj ashjdkhsajdhasjdhja ssad ashdjsahdjsahjdhsajdhsajdhsakhdjsahdjksahdjkhsa ";
+        Template clone = template.clone2(bytes(message));
+
+        bytes memory b = clone.getAppendedCallData();
+        emit log_named_bytes("BYTES", b);
+        assertEq0(bytes(message), b);
+    }
+
+    function testCloneWithCallDataProvisionHello() public {
+        string memory message = "dsaldj asdkasjdklsahfk jhdjkhsasajhdjsahdjksahd jksajdhsajdksajdh sajdhaks kjashdkjah sdjsahdjsahdjksah djkhsajd hsajdhsajdhsa jdhsjadhjsa dhjsahdj shdjsah djksahdjsah dsajdhsajdhkjashdjsa dhjsahd jshdjsah djsahd jsahdjsahdjsahd jsahdjsa hdsajhd jsahdjsahdj sdhjashdj sahdjaks hdjsahdjsa hdjsahdjsahdjsahdjhsa jdhsajdhkjashdkj ashjdkhsajdhasjdhja ssad ashdjsahdjsahjdhsajdhsajdhsakhdjsahdjksahdjkhsa ";
+        Template clone = template.clone2(bytes(message));
+
 
         bytes memory b = clone.hello();
         emit log_named_bytes("BYTES", b);
         assertEq0(bytes("hello"), b);
-
-        // bytes memory b = clone.getDataWithCallDataProvision();
-        // emit log_named_bytes("BYTES", b);
-        // assertEq0(bytes(message), b);
-
-        // bytes memory b = clone.getDataWithCallDataProvision();
-        // emit log_named_bytes("BYTES", b);
-        // assertEq0(bytes(message), b);
     }
 }
