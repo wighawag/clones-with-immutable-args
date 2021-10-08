@@ -29,18 +29,25 @@ contract Greeter is ClonesWithArgs {
         // emit Cloned(clonedGreeter, d);
     }
 
-    function clone3(uint256 data) external returns (Greeter clonedGreeter) {
-        // bytes memory b = "0000000000000000000000000000000000000000000000000000000000000000";
-        bytes memory b = abi.encode(data);
-        emit log_bytes(b);
-        emit log_uint(data);
-        clonedGreeter = Greeter(ClonesWithArgs.clone3b(address(this), b));
-        // uint256 d = clonedGreeter.getData();
-        // emit Cloned(clonedGreeter, d);
+    function clone3(bytes calldata data) external returns (Greeter clonedGreeter) {
+        clonedGreeter = Greeter(ClonesWithArgs.clone3b(address(this), data));
     }
 
+    // function clone3(uint256 data) external returns (Greeter clonedGreeter) {
+    //     // bytes memory b = "0000000000000000000000000000000000000000000000000000000000000000";
+    //     bytes memory b = abi.encode(data);
+    //     emit log_bytes(b);
+    //     emit log_uint(data);
+    //     clonedGreeter = Greeter(ClonesWithArgs.clone3b(address(this), b));
+    //     // uint256 d = clonedGreeter.getData();
+    //     // emit Cloned(clonedGreeter, d);
+    // }
+
     function getData() external returns (bytes memory) {
-        return read(address(this));
+        bytes memory b = read(address(this));
+        emit log_named_string("BYTES", string(b));
+        revert("sds");
+        return b;
     }
 
     function getUInt() external returns (uint256) {

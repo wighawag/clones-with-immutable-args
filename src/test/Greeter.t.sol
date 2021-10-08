@@ -78,11 +78,22 @@ contract Greet is GreeterTest {
         assertEq(num, 789);
     }
 
-    function testClone3() public {
+    // function testClone3() public {
+    //     emit log("hello");
+    //     Greeter clone = greeter.clone3(64654545454);
+    //     uint256 num = clone.getUInt();
+    //     assertEq(num, 64654545454);
+    // }
+
+
+    function testClone3Again() public {
         emit log("hello");
-        Greeter clone = greeter.clone3(64654545454);
-        uint256 num = clone.getUInt();
-        assertEq(num, 64654545454);
+        
+        string memory message = "dsaldj asdkasjdklsahfk jhdjkhsasajhdjsahdjksahd jksajdhsajdksajdh sajdhaks kjashdkjah sdjsahdjsahdjksah djkhsajd hsajdhsajdhsa jdhsjadhjsa dhjsahdj shdjsah djksahdjsah dsajdhsajdhkjashdjsa dhjsahd jshdjsah djsahd jsahdjsahdjsahd jsahdjsa hdsajhd jsahdjsahdj sdhjashdj sahdjaks hdjsahdjsa hdjsahdjsahdjsahdjhsa jdhsajdhkjashdkj ashjdkhsajdhasjdhja ssad ashdjsahdjsahjdhsajdhsajdhsakhdjsahdjksahdjkhsa ";
+        Greeter clone = greeter.clone3(bytes(message));
+        bytes memory b = clone.getData();
+        emit log_named_bytes("BYTES", b);
+        
     }
 }
 

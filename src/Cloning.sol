@@ -236,12 +236,12 @@ contract ClonesWithArgs is DSTest {
         uint256 creationSize = 0x37 + extraLength;
         uint256 runSize = creationSize - 10;
         uint256 dataPtr;
-        
         uint256 ptr;
         assembly {
             ptr := mload(0x40)
            
             mstore(ptr, 0x3d60000000000000000000000000000000000000000000000000000000000000)
+            // TODO for now : PUSH1 (0x60)
             mstore(add(ptr, 0x02), shl(248, runSize)) // size of the contract running bytecode  // TODO support bigger
             mstore(add(ptr, 0x03), 0x80600a3d3981f300000000000000000000000000000000000000000000000000)
 
