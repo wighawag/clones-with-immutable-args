@@ -20,7 +20,7 @@ contract ClonesWithImmutableArgs is DSTest {
         ptr,
         0x3d61000000000000000000000000000000000000000000000000000000000000
       )
-      // TODO for now : PUSH2 (0x61), do push20 ?
+      // TODO for now : PUSH2 (0x61), do higher ?, probably not necessary as 16bit size is greater than what contract can be
       mstore(add(ptr, 0x02), shl(240, runSize)) // size of the contract running bytecode  // TODO support bigger
       mstore(
         add(ptr, 0x04),
@@ -77,7 +77,7 @@ contract ClonesWithImmutableArgs is DSTest {
         ptr,
         0x3d61000000000000000000000000000000000000000000000000000000000000
       )
-      // TODO for now : PUSH2 (0x61), do push20 ?
+      // TODO for now : PUSH2 (0x61), do higher ?, probably not necessary as 16bit size is greater than what contract can be
       mstore(add(ptr, 0x02), shl(240, runSize)) // size of the contract running bytecode  // TODO support bigger
       mstore(
         add(ptr, 0x04),
