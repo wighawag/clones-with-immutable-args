@@ -80,7 +80,7 @@ contract ClonesWithCallData is DSTest {
       // 01          | ADD                   | cds+extra 0 0 0         | [0, cds] = calldata
       // 3d          | RETURNDATASIZE        | 0 cds 0 0 0             | [0, cds] = calldata
       // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0        | [0, cds] = calldata
-      mstore(add(ptr, 0x1d), 0x013d7300000000000000000000000000000000000000000000000000000000)
+      mstore(add(ptr, 0x1d), 0x013d730000000000000000000000000000000000000000000000000000000000)
       mstore(add(ptr, 0x20), shl(0x60, implementation))
 
 
