@@ -10,7 +10,7 @@ library Errors {
     string internal constant CannotGm = "cannot greet with gm";
 }
 
-contract Greeter {
+contract Greeter is ClonesWithArgs {
     string public greeting;
 
     event Cloned(Greeter clone, uint256 d);
@@ -24,14 +24,31 @@ contract Greeter {
     }
 
     function clone(uint256 data) external returns (Greeter clonedGreeter) {
-        clonedGreeter = Greeter(ClonesWithArgs.clone2(address(this), bytes32(data)));
-        uint256 d = clonedGreeter.getData();
-        emit Cloned(clonedGreeter, d);
+        clonedGreeter = Greeter(ClonesWithArgs.clone2b(address(this), bytes32(data)));
+        // uint256 d = clonedGreeter.getData();
+        // emit Cloned(clonedGreeter, d);
     }
 
-    function getData() external pure returns (uint256) {
+    function clone3(uint256 data) external returns (Greeter clonedGreeter) {
+        // bytes memory b = "0000000000000000000000000000000000000000000000000000000000000000";
+        bytes memory b = abi.encode(data);
+        emit log_bytes(b);
+        emit log_uint(data);
+        clonedGreeter = Greeter(ClonesWithArgs.clone3b(address(this), b));
+        // uint256 d = clonedGreeter.getData();
+        // emit Cloned(clonedGreeter, d);
+    }
+
+    function getData() external returns (bytes memory) {
+        return read(address(this));
+    }
+
+    function getUInt() external returns (uint256) {
         // return 0;
-        return _lastAppendedDataAsUint256();
+        bytes memory b = read(address(this));
+        emit log_named_bytes("BYTES", b);
+        return abi.decode(b, (uint256));
+        // return _lastAppendedDataAsUint256();
     }
 
     // fallback() external {}

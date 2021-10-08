@@ -72,10 +72,17 @@ contract Greet is GreeterTest {
     //     // assertEq(location, newLocation);
     // }
 
-    function testClone() public {
+    function testClone2() public {
         Greeter clone = greeter.clone(789);
-        uint256 num = clone.getData();
+        uint256 num = clone.getUInt();
         assertEq(num, 789);
+    }
+
+    function testClone3() public {
+        emit log("hello");
+        Greeter clone = greeter.clone3(64654545454);
+        uint256 num = clone.getUInt();
+        assertEq(num, 64654545454);
     }
 }
 
