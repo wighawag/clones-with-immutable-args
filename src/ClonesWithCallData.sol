@@ -14,6 +14,7 @@ contract ClonesWithCallData is DSTest {
     uint256 runSize = creationSize - 11;
     uint256 dataPtr;
     uint256 ptr;
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       ptr := mload(0x40)
  
@@ -84,7 +85,7 @@ contract ClonesWithCallData is DSTest {
 
 
       // 5a          | GAS                   | gas addr 0 cds 0 0 0    | [0, cds] = calldata
-      // f4          | DELEGATECALL          |success 0                | [0, cds] = calldata
+      // f4          | DELEGATECALL          | success 0                | [0, cds] = calldata
       // 3d          | RETURNDATASIZE        | rds success 0           | [0, cds] = calldata
       // 82          | DUP3                  | 0 rds success 0         | [0, cds] = calldata
       // 80          | DUP1                  | 0 0 rds success 0       | [0, cds] = calldata
@@ -110,10 +111,12 @@ contract ClonesWithCallData is DSTest {
     // -------------------------------------------------------------------------------------------------------------
 
     uint256 copyPtr = ptr + 0x43;
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       dataPtr := add(data, 32)
     }
     for (; extraLength >= 32; extraLength -= 32) {
+      // solhint-disable-next-line no-inline-assembly
       assembly {
         mstore(copyPtr, mload(dataPtr))
       }
@@ -121,9 +124,11 @@ contract ClonesWithCallData is DSTest {
       dataPtr += 32;
     }
     uint256 mask = ~(256**(32 - extraLength) - 1);
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       mstore(copyPtr, and(mload(dataPtr), mask))
     }
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       instance := create(0, ptr, creationSize)
     }
