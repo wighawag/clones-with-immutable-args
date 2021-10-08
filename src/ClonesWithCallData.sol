@@ -9,8 +9,8 @@ contract ClonesWithCallData is DSTest {
     internal
     returns (address instance)
   {
-    uint256 extraLength = data.length;
-    uint256 creationSize = 0x43 + extraLength;
+    uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
+    uint256 creationSize = 0x43 + extraLength ;
     uint256 runSize = creationSize - 11;
     uint256 dataPtr;
     uint256 ptr;
@@ -110,12 +110,14 @@ contract ClonesWithCallData is DSTest {
     // APPENDED DATA (Accessible from extcodecopy)
     // -------------------------------------------------------------------------------------------------------------
 
+    extraLength -= 2;
+    uint256 counter = extraLength;
     uint256 copyPtr = ptr + 0x43;
     // solhint-disable-next-line no-inline-assembly
     assembly {
       dataPtr := add(data, 32)
     }
-    for (; extraLength >= 32; extraLength -= 32) {
+    for (; counter >= 32; counter -= 32) {
       // solhint-disable-next-line no-inline-assembly
       assembly {
         mstore(copyPtr, mload(dataPtr))
@@ -123,10 +125,14 @@ contract ClonesWithCallData is DSTest {
       copyPtr += 32;
       dataPtr += 32;
     }
-    uint256 mask = ~(256**(32 - extraLength) - 1);
+    uint256 mask = ~(256**(32 - counter) - 1);
     // solhint-disable-next-line no-inline-assembly
     assembly {
       mstore(copyPtr, and(mload(dataPtr), mask))
+    }
+    copyPtr += (32 - counter);
+    assembly {
+      mstore(copyPtr, shl(240, extraLength))
     }
     // solhint-disable-next-line no-inline-assembly
     assembly {
