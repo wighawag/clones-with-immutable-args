@@ -30,8 +30,11 @@ contract Greeter {
     }
 
     function getData() external pure returns (uint256) {
+        // return 0;
         return _lastAppendedDataAsUint256();
     }
+
+    // fallback() external {}
 
     function _lastAppendedDataAsUint256() internal pure virtual returns (uint256 data) {
         assembly {
