@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
-import {ClonesWithImmutableArgs} from "./ClonesWithImmutableArgs.sol";
-
+/// @title Clone
+/// @author zefram.eth
+/// @notice Provides helper functions for reading immutable args from calldata
 contract Clone {
     /// @notice Reads an immutable arg with type address
     /// @param argOffset The offset of the arg in the packed data
