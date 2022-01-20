@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.4;
 
 import {Clone} from "./Clone.sol";
