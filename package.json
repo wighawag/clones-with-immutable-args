@@ -1,7 +1,7 @@
 {
   "name": "clones-with-immutable-args",
   "author": "wighawag",
-  "license": "Unlicense",
+  "license": "BSD",
   "version": "1.0.0",
   "description": "Factory for deploying clones with immutable parameters.",
   "files": [

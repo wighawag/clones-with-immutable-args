@@ -28,6 +28,12 @@ To install with [Foundry](https://github.com/gakonst/foundry):
 forge install wighawag/clones-with-immutable-args
 ```
 
+To install with [Hardhat](https://hardhat.org):
+
+```
+npm i -D clones-with-immutable-args
+```
+
 ## Local development
 
 This project uses [Foundry](https://github.com/gakonst/foundry) as the development framework.
