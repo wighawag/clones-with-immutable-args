@@ -1,2 +1,1 @@
-.dapprc linguist-language=Shell
 *.sol linguist-language=Solidity

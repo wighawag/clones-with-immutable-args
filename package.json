@@ -1,9 +1,9 @@
 {
-  "name": "dapptools-template",
-  "author": "Georgios Konstantopoulos",
+  "name": "clones-with-immutable-args",
+  "author": "wighawag",
   "license": "Unlicense",
   "version": "1.0.0",
-  "description": "A template for building dapptools projects",
+  "description": "Factory for deploying clones with immutable parameters.",
   "files": [
     "*.sol"
   ],

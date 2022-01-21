@@ -1,91 +1,51 @@
-# <h1 align="center"> DappTools Template </h1>
+# ClonesWithImmutableArgs
 
-**Template repository for getting started quickly with DappTools**
+Enables creating clone contracts with immutable arguments.
 
-![Github Actions](https://github.com/gakonst/dapptools-template/workflows/Tests/badge.svg)
+The immutable arguments are stored in the code region of the created proxy contract, and whenever the proxy is called, it reads the arguments into memory, and then appends them to the calldata of the delegate call to the implementation contract. The implementation contract can thus read the arguments straight from calldata.
 
-## Building and testing
+By doing so, the gas cost of creating clones is reduced, since there's no need to store the immutable arguments in storage. The cost of using the clones is also reduced, since storage loads are replaced with calldata reading, which is far cheaper.
 
-```sh
-git clone https://github.com/gakonst/dapptools-template
-cd dapptools-template
-make
+## Usage
+
+Clone factory contracts should use the [`ClonesWithImmutableArgs`](src/ClonesWithImmutableArgs.sol) library. `ClonesWithImmutableArgs.clone()` is the main function for creating clones.
+
+Contracts intended to be cloned should inherit from [`Clone`](src/Clone.sol) to get access to the helper functions for reading immutable args.
+
+To see an example usage of the library, check out [`ExampleClone`](src/ExampleClone.sol) and [`ExampleCloneFactory`](src/ExampleCloneFactory.sol).
+
+## Installation
+
+To install with [DappTools](https://github.com/dapphub/dapptools):
+
+```
+dapp install wighawag/clones-with-immutable-args
+```
+
+To install with [Foundry](https://github.com/gakonst/foundry):
+
+```
+forge install wighawag/clones-with-immutable-args
+```
+
+## Local development
+
+This project uses [Foundry](https://github.com/gakonst/foundry) as the development framework.
+
+### Dependencies
+
+```
+make update
+```
+
+### Compilation
+
+```
+make build
+```
+
+### Testing
+
+```
 make test
 ```
-
-## Deploying
-
-Contracts can be deployed via the `make deploy` command. Addresses are automatically
-written in a name-address json file stored under `out/addresses.json`.
-
-We recommend testing your deployments and provide an example under [`scripts/test-deploy.sh`](./scripts/test-deploy.sh)
-which will launch a local testnet, deploy the contracts, and do some sanity checks.
-
-Environment variables under the `.env` file are automatically loaded (see [`.env.example`](./.env.example)).
-Be careful of the [precedence in which env vars are read](https://github.com/dapphub/dapptools/tree/2cf441052489625f8635bc69eb4842f0124f08e4/src/dapp#precedence).
-
-We assume `ETH_FROM` is an address you own and is part of your keystore.
-If not, use `ethsign import` to import your private key.
-
-See the [`Makefile`](./Makefile#25) for more context on how this works under the hood
-
-We use Alchemy as a remote node provider for the Mainnet & Rinkeby network deployments.
-You must have set your API key as the `ALCHEMY_API_KEY` enviroment variable in order to
-deploy to these networks
-
-### Mainnet
-
-```
-ETH_FROM=0x3538b6eF447f244268BCb2A0E1796fEE7c45002D make deploy-mainnet
-```
-
-### Rinkeby
-
-```
-ETH_FROM=0x3538b6eF447f244268BCb2A0E1796fEE7c45002D make deploy-rinkeby
-```
-
-### Custom Network
-
-```
-ETH_RPC_URL=<your network> make deploy
-```
-
-### Local Testnet
-
-```
-# on one terminal
-dapp testnet
-# get the printed account address from the testnet, and set it as ETH_FROM. Then:
-make deploy
-```
-
-## Installing the toolkit
-
-If you do not have DappTools already installed, you'll need to run the below
-commands
-
-### Install Nix
-
-```sh
-# User must be in sudoers
-curl -L https://nixos.org/nix/install | sh
-
-# Run this or login again to use Nix
-. "$HOME/.nix-profile/etc/profile.d/nix.sh"
-```
-
-### Install DappTools
-
-```sh
-curl https://dapp.tools/install | sh
-```
-
-## DappTools Resources
-
-* [DappTools](https://dapp.tools)
-    * [Hevm Docs](https://github.com/dapphub/dapptools/blob/master/src/hevm/README.md)
-    * [Dapp Docs](https://github.com/dapphub/dapptools/tree/master/src/dapp/README.md)
-    * [Seth Docs](https://github.com/dapphub/dapptools/tree/master/src/seth/README.md)
-* [DappTools Overview](https://www.youtube.com/watch?v=lPinWgaNceM)
-* [Awesome-DappTools](https://github.com/rajivpo/awesome-dapptools)
