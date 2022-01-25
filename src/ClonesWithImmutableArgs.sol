@@ -20,8 +20,8 @@ library ClonesWithImmutableArgs {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
-            uint256 creationSize = 0x43 + extraLength;
-            uint256 runSize = creationSize - 11;
+            uint256 creationSize = 0x42 + extraLength;
+            uint256 runSize = creationSize - 10;
             uint256 dataPtr;
             uint256 ptr;
             // solhint-disable-next-line no-inline-assembly
@@ -29,28 +29,23 @@ library ClonesWithImmutableArgs {
                 ptr := mload(0x40)
 
                 // -------------------------------------------------------------------------------------------------------------
-                // CREATION (11 bytes)
+                // CREATION (10 bytes)
                 // -------------------------------------------------------------------------------------------------------------
 
-                // 3d          | RETURNDATASIZE        | 0                       | –
-                // 61 runtime  | PUSH2 runtime (r)     | r 0                     | –
+                // 61 runtime  | PUSH2 runtime (r)     | r                       | –
                 mstore(
                     ptr,
-                    0x3d61000000000000000000000000000000000000000000000000000000000000
+                    0x6100000000000000000000000000000000000000000000000000000000000000
                 )
-                mstore(add(ptr, 0x02), shl(240, runSize)) // size of the contract running bytecode (16 bits)
+                mstore(add(ptr, 0x01), shl(240, runSize)) // size of the contract running bytecode (16 bits)
 
-                // creation size = 0b
-                // 80          | DUP1                  | r r 0                   | –
-                // 60 creation | PUSH1 creation (c)    | c r r 0                 | –
-                // 3d          | RETURNDATASIZE        | 0 c r r 0               | –
-                // 39          | CODECOPY              | r 0                     | [0-2d]: runtime code
-                // 81          | DUP2                  | 0 c  0                  | [0-2d]: runtime code
+                // creation size = 0a
+                // 3d          | RETURNDATASIZE        | 0 r                     | –
+                // 81          | DUP2                  | r 0 r                   | –
+                // 60 creation | PUSH1 creation (c)    | c r 0 r                 | –
+                // 3d          | RETURNDATASIZE        | 0 c r 0 r               | –
+                // 39          | CODECOPY              | 0 r                     | [0-2d]: runtime code
                 // f3          | RETURN                | 0                       | [0-2d]: runtime code
-                mstore(
-                    add(ptr, 0x04),
-                    0x80600b3d3981f300000000000000000000000000000000000000000000000000
-                )
 
                 // -------------------------------------------------------------------------------------------------------------
                 // RUNTIME
@@ -62,10 +57,10 @@ library ClonesWithImmutableArgs {
                 // 37          | CALLDATACOPY          | –                       | [0, cds] = calldata
                 // 61          | PUSH2 extra           | extra                   | [0, cds] = calldata
                 mstore(
-                    add(ptr, 0x0b),
-                    0x363d3d3761000000000000000000000000000000000000000000000000000000
+                    add(ptr, 0x03),
+                    0x3d81600a3d39f3363d3d37610000000000000000000000000000000000000000
                 )
-                mstore(add(ptr, 0x10), shl(240, extraLength))
+                mstore(add(ptr, 0x0f), shl(240, extraLength))
 
                 // 60 0x38     | PUSH1 0x38            | 0x38 extra              | [0, cds] = calldata // 0x38 (56) is runtime size - data
                 // 36          | CALLDATASIZE          | cds 0x38 extra          | [0, cds] = calldata
@@ -76,19 +71,19 @@ library ClonesWithImmutableArgs {
                 // 36          | CALLDATASIZE          | cds 0 0 0               | [0, cds] = calldata
                 // 61 extra    | PUSH2 extra           | extra cds 0 0 0         | [0, cds] = calldata
                 mstore(
-                    add(ptr, 0x12),
+                    add(ptr, 0x11),
                     0x603836393d3d3d36610000000000000000000000000000000000000000000000
                 )
-                mstore(add(ptr, 0x1b), shl(240, extraLength))
+                mstore(add(ptr, 0x1a), shl(240, extraLength))
 
                 // 01          | ADD                   | cds+extra 0 0 0         | [0, cds] = calldata
                 // 3d          | RETURNDATASIZE        | 0 cds 0 0 0             | [0, cds] = calldata
                 // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0        | [0, cds] = calldata
                 mstore(
-                    add(ptr, 0x1d),
+                    add(ptr, 0x1c),
                     0x013d730000000000000000000000000000000000000000000000000000000000
                 )
-                mstore(add(ptr, 0x20), shl(0x60, implementation))
+                mstore(add(ptr, 0x1f), shl(0x60, implementation))
 
                 // 5a          | GAS                   | gas addr 0 cds 0 0 0    | [0, cds] = calldata
                 // f4          | DELEGATECALL          | success 0               | [0, cds] = calldata
@@ -106,7 +101,7 @@ library ClonesWithImmutableArgs {
                 // f3          | RETURN                | –                       | [0, rds] = return data
 
                 mstore(
-                    add(ptr, 0x34),
+                    add(ptr, 0x33),
                     0x5af43d82803e903d91603657fd5bf30000000000000000000000000000000000
                 )
             }
@@ -118,7 +113,7 @@ library ClonesWithImmutableArgs {
 
             extraLength -= 2;
             uint256 counter = extraLength;
-            uint256 copyPtr = ptr + 0x43;
+            uint256 copyPtr = ptr + 0x42;
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 dataPtr := add(data, 32)
