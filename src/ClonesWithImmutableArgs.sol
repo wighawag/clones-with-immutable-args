@@ -45,7 +45,7 @@ library ClonesWithImmutableArgs {
                 // 60 creation | PUSH1 creation (c)    | c r 0 r                 | –
                 // 3d          | RETURNDATASIZE        | 0 c r 0 r               | –
                 // 39          | CODECOPY              | 0 r                     | [0-runSize): runtime code
-                // f3          | RETURN                | 0                       | [0-runSize): runtime code
+                // f3          | RETURN                |                         | [0-runSize): runtime code
 
                 // -------------------------------------------------------------------------------------------------------------
                 // RUNTIME (55 bytes + extraLength)
