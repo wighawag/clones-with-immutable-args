@@ -36,7 +36,7 @@ contract Clone {
 
     /// @notice Reads a uint256 array stored in the immutable args.
     /// @param argOffset The offset of the arg in the packed data
-    /// @param arrLen Amount of elements in the array
+    /// @param arrLen Number of elements in the array
     /// @return arr The array
     function _getArgUint256Array(uint256 argOffset, uint64 arrLen)
         internal
