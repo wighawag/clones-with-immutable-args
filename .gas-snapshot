@@ -1,0 +1,6 @@
+testCorrectness_clone(address,uint256,uint64,uint8) (runs: 256, μ: 61695, ~: 61697)
+testGas_clone(address,uint256,uint64,uint8) (runs: 256, μ: 57809, ~: 57811)
+testGas_param1() (gas: 1267)
+testGas_param2() (gas: 1179)
+testGas_param3() (gas: 1249)
+testGas_param4() (gas: 1294)

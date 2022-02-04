@@ -14,6 +14,7 @@ contract Clone {
         returns (address arg)
     {
         uint256 offset = _getImmutableArgsOffset();
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             arg := shr(0x60, calldataload(add(offset, argOffset)))
         }

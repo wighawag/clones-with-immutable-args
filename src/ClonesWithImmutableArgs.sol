@@ -20,8 +20,8 @@ library ClonesWithImmutableArgs {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
-            uint256 creationSize = 0x43 + extraLength;
-            uint256 runSize = creationSize - 11;
+            uint256 creationSize = 0x41 + extraLength;
+            uint256 runSize = creationSize - 10;
             uint256 dataPtr;
             uint256 ptr;
             // solhint-disable-next-line no-inline-assembly
@@ -29,85 +29,78 @@ library ClonesWithImmutableArgs {
                 ptr := mload(0x40)
 
                 // -------------------------------------------------------------------------------------------------------------
-                // CREATION (11 bytes)
+                // CREATION (10 bytes)
+                // -------------------------------------------------------------------------------------------------------------
+
+                // 61 runtime  | PUSH2 runtime (r)     | r                       | –
+                mstore(
+                    ptr,
+                    0x6100000000000000000000000000000000000000000000000000000000000000
+                )
+                mstore(add(ptr, 0x01), shl(240, runSize)) // size of the contract running bytecode (16 bits)
+
+                // creation size = 0a
+                // 3d          | RETURNDATASIZE        | 0 r                     | –
+                // 81          | DUP2                  | r 0 r                   | –
+                // 60 creation | PUSH1 creation (c)    | c r 0 r                 | –
+                // 3d          | RETURNDATASIZE        | 0 c r 0 r               | –
+                // 39          | CODECOPY              | 0 r                     | [0-runSize): runtime code
+                // f3          | RETURN                |                         | [0-runSize): runtime code
+
+                // -------------------------------------------------------------------------------------------------------------
+                // RUNTIME (55 bytes + extraLength)
                 // -------------------------------------------------------------------------------------------------------------
 
                 // 3d          | RETURNDATASIZE        | 0                       | –
-                // 61 runtime  | PUSH2 runtime (r)     | r 0                     | –
+                // 3d          | RETURNDATASIZE        | 0 0                     | –
+                // 3d          | RETURNDATASIZE        | 0 0 0                   | –
+                // 3d          | RETURNDATASIZE        | 0 0 0 0                 | –
+                // 36          | CALLDATASIZE          | cds 0 0 0 0             | –
+                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0 0           | –
+                // 3d          | RETURNDATASIZE        | 0 0 cds 0 0 0 0         | –
+                // 37          | CALLDATACOPY          | 0 0 0 0                 | [0, cds) = calldata
+                // 61          | PUSH2 extra           | extra 0 0 0 0           | [0, cds) = calldata
                 mstore(
-                    ptr,
-                    0x3d61000000000000000000000000000000000000000000000000000000000000
+                    add(ptr, 0x03),
+                    0x3d81600a3d39f33d3d3d3d363d3d376100000000000000000000000000000000
                 )
-                mstore(add(ptr, 0x02), shl(240, runSize)) // size of the contract running bytecode (16 bits)
+                mstore(add(ptr, 0x13), shl(240, extraLength))
 
-                // creation size = 0b
-                // 80          | DUP1                  | r r 0                   | –
-                // 60 creation | PUSH1 creation (c)    | c r r 0                 | –
-                // 3d          | RETURNDATASIZE        | 0 c r r 0               | –
-                // 39          | CODECOPY              | r 0                     | [0-2d]: runtime code
-                // 81          | DUP2                  | 0 c  0                  | [0-2d]: runtime code
-                // f3          | RETURN                | 0                       | [0-2d]: runtime code
+                // 60 0x37     | PUSH1 0x37            | 0x37 extra 0 0 0 0      | [0, cds) = calldata // 0x37 (55) is runtime size - data
+                // 36          | CALLDATASIZE          | cds 0x37 extra 0 0 0 0  | [0, cds) = calldata
+                // 39          | CODECOPY              | 0 0 0 0                 | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 36          | CALLDATASIZE          | cds 0 0 0 0             | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 61 extra    | PUSH2 extra           | extra cds 0 0 0 0       | [0, cds) = calldata, [cds, cds+0x37) = extraData
                 mstore(
-                    add(ptr, 0x04),
-                    0x80600b3d3981f300000000000000000000000000000000000000000000000000
-                )
-
-                // -------------------------------------------------------------------------------------------------------------
-                // RUNTIME
-                // -------------------------------------------------------------------------------------------------------------
-
-                // 36          | CALLDATASIZE          | cds                     | –
-                // 3d          | RETURNDATASIZE        | 0 cds                   | –
-                // 3d          | RETURNDATASIZE        | 0 0 cds                 | –
-                // 37          | CALLDATACOPY          | –                       | [0, cds] = calldata
-                // 61          | PUSH2 extra           | extra                   | [0, cds] = calldata
-                mstore(
-                    add(ptr, 0x0b),
-                    0x363d3d3761000000000000000000000000000000000000000000000000000000
-                )
-                mstore(add(ptr, 0x10), shl(240, extraLength))
-
-                // 60 0x38     | PUSH1 0x38            | 0x38 extra              | [0, cds] = calldata // 0x38 (56) is runtime size - data
-                // 36          | CALLDATASIZE          | cds 0x38 extra          | [0, cds] = calldata
-                // 39          | CODECOPY              | _                       | [0, cds] = calldata
-                // 3d          | RETURNDATASIZE        | 0                       | [0, cds] = calldata
-                // 3d          | RETURNDATASIZE        | 0 0                     | [0, cds] = calldata
-                // 3d          | RETURNDATASIZE        | 0 0 0                   | [0, cds] = calldata
-                // 36          | CALLDATASIZE          | cds 0 0 0               | [0, cds] = calldata
-                // 61 extra    | PUSH2 extra           | extra cds 0 0 0         | [0, cds] = calldata
-                mstore(
-                    add(ptr, 0x12),
-                    0x603836393d3d3d36610000000000000000000000000000000000000000000000
+                    add(ptr, 0x15),
+                    0x6037363936610000000000000000000000000000000000000000000000000000
                 )
                 mstore(add(ptr, 0x1b), shl(240, extraLength))
 
-                // 01          | ADD                   | cds+extra 0 0 0         | [0, cds] = calldata
-                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0             | [0, cds] = calldata
-                // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0        | [0, cds] = calldata
+                // 01          | ADD                   | cds+extra 0 0 0 0       | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0 0           | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0 0      | [0, cds) = calldata, [cds, cds+0x37) = extraData
                 mstore(
                     add(ptr, 0x1d),
                     0x013d730000000000000000000000000000000000000000000000000000000000
                 )
                 mstore(add(ptr, 0x20), shl(0x60, implementation))
 
-                // 5a          | GAS                   | gas addr 0 cds 0 0 0    | [0, cds] = calldata
-                // f4          | DELEGATECALL          | success 0               | [0, cds] = calldata
-                // 3d          | RETURNDATASIZE        | rds success 0           | [0, cds] = calldata
-                // 82          | DUP3                  | 0 rds success 0         | [0, cds] = calldata
-                // 80          | DUP1                  | 0 0 rds success 0       | [0, cds] = calldata
-                // 3e          | RETURNDATACOPY        | success 0               | [0, rds] = return data (there might be some irrelevant leftovers in memory [rds, cds] when rds < cds)
-                // 90          | SWAP1                 | 0 success               | [0, rds] = return data
-                // 3d          | RETURNDATASIZE        | rds 0 success           | [0, rds] = return data
-                // 91          | SWAP2                 | success 0 rds           | [0, rds] = return data
-                // 60 0x36     | PUSH1 0x36            | 0x36 sucess 0 rds       | [0, rds] = return data
-                // 57          | JUMPI                 | 0 rds                   | [0, rds] = return data
-                // fd          | REVERT                | –                       | [0, rds] = return data
-                // 5b          | JUMPDEST              | 0 rds                   | [0, rds] = return data
-                // f3          | RETURN                | –                       | [0, rds] = return data
-
+                // 5a          | GAS                   | gas addr 0 cds 0 0 0 0  | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // f4          | DELEGATECALL          | success 0 0             | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 3d          | RETURNDATASIZE        | rds success 0 0         | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 3d          | RETURNDATASIZE        | rds rds success 0 0     | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 93          | SWAP4                 | 0 rds success 0 rds     | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 80          | DUP1                  | 0 0 rds success 0 rds   | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 3e          | RETURNDATACOPY        | success 0 rds           | [0, rds) = return data (there might be some irrelevant leftovers in memory [rds, cds+0x37) when rds < cds+0x37)
+                // 60 0x35     | PUSH1 0x35            | 0x35 sucess 0 rds       | [0, rds) = return data
+                // 57          | JUMPI                 | 0 rds                   | [0, rds) = return data
+                // fd          | REVERT                | –                       | [0, rds) = return data
+                // 5b          | JUMPDEST              | 0 rds                   | [0, rds) = return data
+                // f3          | RETURN                | –                       | [0, rds) = return data
                 mstore(
                     add(ptr, 0x34),
-                    0x5af43d82803e903d91603657fd5bf30000000000000000000000000000000000
+                    0x5af43d3d93803e603557fd5bf300000000000000000000000000000000000000
                 )
             }
 
@@ -118,7 +111,7 @@ library ClonesWithImmutableArgs {
 
             extraLength -= 2;
             uint256 counter = extraLength;
-            uint256 copyPtr = ptr + 0x43;
+            uint256 copyPtr = ptr + 0x41;
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 dataPtr := add(data, 32)
