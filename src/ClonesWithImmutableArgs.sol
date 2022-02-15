@@ -15,7 +15,7 @@ library ClonesWithImmutableArgs {
     /// @return instance The address of the created clone
     function clone(address implementation, bytes memory data)
         internal
-        returns (address instance)
+        returns (address payable instance)
     {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
