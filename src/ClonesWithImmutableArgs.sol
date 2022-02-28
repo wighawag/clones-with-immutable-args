@@ -6,7 +6,7 @@ pragma solidity ^0.8.4;
 /// @author wighawag, zefram.eth
 /// @notice Enables creating clone contracts with immutable args
 library ClonesWithImmutableArgs {
-    error CreateFail();
+    error Create2fail();
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
@@ -135,12 +135,22 @@ library ClonesWithImmutableArgs {
             assembly {
                 mstore(copyPtr, shl(240, extraLength))
             }
+            bytes memory addrSalt;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                instance := create(0, ptr, creationSize)
+                let m := mload(0x40)
+                implementation := and(implementation, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+                mstore(add(m, 20), xor(0x140000000000000000000000000000000000000000, implementation))
+                mstore(0x40, add(m, 52))
+                addrSalt := m
+            }
+            bytes32 salt = keccak256(addrSalt);
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                instance := create2(0, ptr, creationSize, salt)
             }
             if (instance == address(0)) {
-                revert CreateFail();
+                revert Create2fail();
             }
         }
     }
