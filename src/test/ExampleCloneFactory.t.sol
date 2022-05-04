@@ -25,9 +25,10 @@ contract ExampleCloneFactoryTest is DSTest {
         address param1,
         uint256 param2,
         uint64 param3,
-        uint8 param4
+        uint8 param4,
+        bytes32 salt
     ) public {
-        factory.createClone(param1, param2, param3, param4);
+        factory.createClone(param1, param2, param3, param4, salt);
     }
 
     /// -----------------------------------------------------------------------
@@ -38,13 +39,15 @@ contract ExampleCloneFactoryTest is DSTest {
         address param1,
         uint256 param2,
         uint64 param3,
-        uint8 param4
+        uint8 param4,
+        bytes32 salt
     ) public {
         ExampleClone clone = factory.createClone(
             param1,
             param2,
             param3,
-            param4
+            param4,
+            salt
         );
         assertEq(clone.param1(), param1);
         assertEq(clone.param2(), param2);
