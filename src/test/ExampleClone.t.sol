@@ -13,12 +13,12 @@ contract ExampleCloneTest is DSTest {
     ExampleClone internal clone;
     ExampleCloneFactory internal factory;
     
-    bytes32 internal constant null = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    bytes32 internal constant nully = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
     function setUp() public {
         ExampleClone implementation = new ExampleClone();
         factory = new ExampleCloneFactory(implementation);
-        clone = factory.createClone(address(this), type(uint256).max, 8008, 69, null);
+        clone = factory.createClone(address(this), type(uint256).max, 8008, 69, nully);
     }
 
     /// -----------------------------------------------------------------------
