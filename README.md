@@ -4,7 +4,7 @@ Enables creating clone contracts with immutable arguments.
 
 The immutable arguments are stored in the code region of the created proxy contract, and whenever the proxy is called, it reads the arguments into memory, and then appends them to the calldata of the delegate call to the implementation contract. The implementation contract can thus read the arguments straight from calldata.
 
-By doing so, the gas cost of creating clones is reduced, since there's no need to store the immutable arguments in storage. The cost of using the clones is also reduced, since storage loads are replaced with calldata reading, which is far cheaper.
+By doing so, the gas cost of creating parametrizable clones is reduced, since there's no need to store the parameters in storage, which you need to do with [EIP-1167](https://eips.ethereum.org/EIPS/eip-1167). The cost of using such clones is also reduced, since storage loads are replaced with calldata reading, which is far cheaper.
 
 ## Usage
 
