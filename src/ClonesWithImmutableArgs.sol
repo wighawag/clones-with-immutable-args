@@ -12,11 +12,14 @@ library ClonesWithImmutableArgs {
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
+    /// @param salt Unique identifier for create2 deployment
+    /// @dev if null, create opcode is used instead
     /// @return instance The address of the created clone
-    function clone(address implementation, bytes memory data)
-        internal
-        returns (address payable instance)
-    {
+    function clone(
+        address implementation, 
+        bytes memory data, 
+        bytes32 salt
+    ) internal returns (address payable instance) {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
@@ -137,7 +140,12 @@ library ClonesWithImmutableArgs {
             }
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                instance := create(0, ptr, creationSize)
+                if iszero(salt) {
+                    instance := create(0, ptr, creationSize)
+                }
+                if iszero(iszero(salt)) {
+                    instance := create2(0, ptr, creationSize, salt)
+                }
             }
             if (instance == address(0)) {
                 revert CreateFail();
