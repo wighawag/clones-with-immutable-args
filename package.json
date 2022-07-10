@@ -1,8 +1,12 @@
 {
   "name": "clones-with-immutable-args",
   "author": "wighawag",
+  "contributors": [
+    "zefram.eth",
+    "Saw-mon & Natalie <sawmonandnatalie@gmail.com> (https://www.sawmon-and-natalie.com/)"
+  ],
   "license": "BSD",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Factory for deploying clones with immutable parameters.",
   "files": [
     "*.sol"
