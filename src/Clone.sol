@@ -52,16 +52,11 @@ contract Clone {
 
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            let i
-            arrLen := mul(arrLen, ONE_WORD)
-            for {} lt(i, arrLen) {} {
-                let j := add(i, ONE_WORD)
-                mstore(
-                    add(arr, j), 
-                    calldataload(add(offset, i))
-                )
-                i := j
-            }
+            calldatacopy(
+                add(arr, ONE_WORD),
+                offset,
+                shl(5, arrLen)
+            )
         }
     }
 
