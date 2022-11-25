@@ -1,5 +1,5 @@
-ExampleCloneFactoryTest:testCorrectness_clone(address,uint256,uint64,uint8) (runs: 256, μ: 69927, ~: 69927)
-ExampleCloneFactoryTest:testGas_clone(address,uint256,uint64,uint8) (runs: 256, μ: 64003, ~: 64003)
+ExampleCloneFactoryTest:testCorrectness_clone(address,uint256,uint64,uint8) (runs: 256, μ: 69925, ~: 69925)
+ExampleCloneFactoryTest:testGas_clone(address,uint256,uint64,uint8) (runs: 256, μ: 64001, ~: 64001)
 ExampleCloneTest:testGas_param4() (gas: 8177)
 ExampleCloneTest:testGas_param1() (gas: 8144)
 ExampleCloneTest:testGas_param3() (gas: 8132)
