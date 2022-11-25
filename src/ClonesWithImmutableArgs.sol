@@ -6,12 +6,11 @@ pragma solidity ^0.8.4;
 /// @author wighawag, zefram.eth, Saw-mon & Natalie
 /// @notice Enables creating clone contracts with immutable args
 library ClonesWithImmutableArgs {
-    error CreateFail();
-
     uint256 private constant FREE_MEMORY_POINTER_SLOT = 0x40;
     uint256 private constant BOOTSTRAP_LENGTH = 0x3f;
     uint256 private constant ONE_WORD = 0x20;
     uint256 private constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    bytes32 private constant CREATE_FAIL_ERROR = 0xebfef18800000000000000000000000000000000000000000000000000000000;
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
@@ -147,12 +146,14 @@ library ClonesWithImmutableArgs {
 
             instance := create(0, ptr, creationSize)
 
+            if iszero(instance) {
+                // revert CreateFail()
+                mstore(0, CREATE_FAIL_ERROR)
+                revert(0, ONE_WORD)
+            }
+
             // Update free memory pointer
             mstore(FREE_MEMORY_POINTER_SLOT, add(ptr, creationSize))
-        }
-
-        if (instance == address(0)) {
-            revert CreateFail();
         }
     }
 }
