@@ -11,6 +11,7 @@ library ClonesWithImmutableArgs {
     uint256 private constant FREE_MEMORY_POINTER_SLOT = 0x40;
     uint256 private constant BOOTSTRAP_LENGTH = 0x3f;
     uint256 private constant ONE_WORD = 0x20;
+    uint256 private constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
@@ -136,8 +137,8 @@ library ClonesWithImmutableArgs {
             }
                 
             let mask := shl(
-                mul(0x8, sub(ONE_WORD, counter)), 
-                not(0)
+                shl(3, sub(ONE_WORD, counter)), 
+                MAX_UINT256
             )
 
             mstore(copyPtr, and(mload(dataPtr), mask))
