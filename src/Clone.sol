@@ -8,9 +8,11 @@ contract Clone {
     /// @notice Reads an immutable arg with type address
     /// @param argOffset The offset of the arg in the packed data
     /// @return arg The arg value
-    function _getArgAddress(
-        uint256 argOffset
-    ) internal pure returns (address arg) {
+    function _getArgAddress(uint256 argOffset)
+        internal
+        pure
+        returns (address arg)
+    {
         uint256 offset = _getImmutableArgsOffset();
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -21,9 +23,11 @@ contract Clone {
     /// @notice Reads an immutable arg with type uint256
     /// @param argOffset The offset of the arg in the packed data
     /// @return arg The arg value
-    function _getArgUint256(
-        uint256 argOffset
-    ) internal pure returns (uint256 arg) {
+    function _getArgUint256(uint256 argOffset)
+        internal
+        pure
+        returns (uint256 arg)
+    {
         uint256 offset = _getImmutableArgsOffset();
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -35,24 +39,25 @@ contract Clone {
     /// @param argOffset The offset of the arg in the packed data
     /// @param arrLen Number of elements in the array
     /// @return arr The array
-    function _getArgUint256Array(
-        uint256 argOffset,
-        uint64 arrLen
-    ) internal pure returns (uint256[] memory arr) {
-        uint256 offset = _getImmutableArgsOffset();
-        uint256 el;
-        arr = new uint256[](arrLen);
-        for (uint64 i = 0; i < arrLen; i++) {
-            assembly {
-                // solhint-disable-next-line no-inline-assembly
-                el := calldataload(add(add(offset, argOffset), mul(i, 32)))
-            }
-            arr[i] = el;
+    function _getArgUint256Array(uint256 argOffset, uint64 arrLen)
+        internal
+        pure
+      returns (uint256[] memory arr)
+    {
+      uint256 offset = _getImmutableArgsOffset();
+      uint256 el;
+      arr = new uint256[](arrLen);
+      for (uint64 i = 0; i < arrLen; i++) {
+        assembly {
+          // solhint-disable-next-line no-inline-assembly
+          el := calldataload(add(add(offset, argOffset), mul(i, 32)))
         }
-        return arr;
+        arr[i] = el;
+      }
+      return arr;
     }
 
-    /// @notice Reads a address array stored in the immutable args.
+    /// @notice Reads an address array stored in the immutable args.
     /// @param argOffset The offset of the arg in the packed data
     /// @param arrLen Number of elements in the array
     /// @return arr The array
@@ -76,9 +81,11 @@ contract Clone {
     /// @notice Reads an immutable arg with type uint64
     /// @param argOffset The offset of the arg in the packed data
     /// @return arg The arg value
-    function _getArgUint64(
-        uint256 argOffset
-    ) internal pure returns (uint64 arg) {
+    function _getArgUint64(uint256 argOffset)
+        internal
+        pure
+        returns (uint64 arg)
+    {
         uint256 offset = _getImmutableArgsOffset();
         // solhint-disable-next-line no-inline-assembly
         assembly {
