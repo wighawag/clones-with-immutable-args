@@ -32,7 +32,7 @@ library ClonesWithImmutableArgs {
                 // CREATION (10 bytes)
                 // -------------------------------------------------------------------------------------------------------------
 
-                // 61 runtime  | PUSH2 runtime (r)     | r                       | –
+                // 61 runtime  | PUSH2 runtime (r)     | r                             | –
                 mstore(
                     ptr,
                     0x6100000000000000000000000000000000000000000000000000000000000000
@@ -40,64 +40,64 @@ library ClonesWithImmutableArgs {
                 mstore(add(ptr, 0x01), shl(240, runSize)) // size of the contract running bytecode (16 bits)
 
                 // creation size = 0a
-                // 3d          | RETURNDATASIZE        | 0 r                     | –
-                // 81          | DUP2                  | r 0 r                   | –
-                // 60 creation | PUSH1 creation (c)    | c r 0 r                 | –
-                // 3d          | RETURNDATASIZE        | 0 c r 0 r               | –
-                // 39          | CODECOPY              | 0 r                     | [0-runSize): runtime code
-                // f3          | RETURN                |                         | [0-runSize): runtime code
+                // 3d          | RETURNDATASIZE        | 0 r                           | –
+                // 81          | DUP2                  | r 0 r                         | –
+                // 60 creation | PUSH1 creation (c)    | c r 0 r                       | –
+                // 3d          | RETURNDATASIZE        | 0 c r 0 r                     | –
+                // 39          | CODECOPY              | 0 r                           | [0-runSize): runtime code
+                // f3          | RETURN                |                               | [0-runSize): runtime code
 
                 // -------------------------------------------------------------------------------------------------------------
                 // RUNTIME (55 bytes + extraLength)
                 // -------------------------------------------------------------------------------------------------------------
 
-                // 3d          | RETURNDATASIZE        | 0                       | –
-                // 3d          | RETURNDATASIZE        | 0 0                     | –
-                // 3d          | RETURNDATASIZE        | 0 0 0                   | –
-                // 3d          | RETURNDATASIZE        | 0 0 0 0                 | –
-                // 36          | CALLDATASIZE          | cds 0 0 0 0             | –
-                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0 0           | –
-                // 3d          | RETURNDATASIZE        | 0 0 cds 0 0 0 0         | –
-                // 37          | CALLDATACOPY          | 0 0 0 0                 | [0, cds) = calldata
-                // 61          | PUSH2 extra           | extra 0 0 0 0           | [0, cds) = calldata
+                // 3d          | RETURNDATASIZE        | 0                             | –
+                // 3d          | RETURNDATASIZE        | 0 0                           | –
+                // 3d          | RETURNDATASIZE        | 0 0 0                         | –
+                // 3d          | RETURNDATASIZE        | 0 0 0 0                       | –
+                // 36          | CALLDATASIZE          | cds 0 0 0 0                   | –
+                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0 0                 | –
+                // 3d          | RETURNDATASIZE        | 0 0 cds 0 0 0 0               | –
+                // 37          | CALLDATACOPY          | 0 0 0 0                       | [0, cds) = calldata
+                // 61          | PUSH2 extra           | extra 0 0 0 0                 | [0, cds) = calldata
                 mstore(
                     add(ptr, 0x03),
                     0x3d81600a3d39f33d3d3d3d363d3d376100000000000000000000000000000000
                 )
                 mstore(add(ptr, 0x13), shl(240, extraLength))
 
-                // 60 0x37     | PUSH1 0x37            | 0x37 extra 0 0 0 0      | [0, cds) = calldata // 0x37 (55) is runtime size - data
-                // 36          | CALLDATASIZE          | cds 0x37 extra 0 0 0 0  | [0, cds) = calldata
-                // 39          | CODECOPY              | 0 0 0 0                 | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 36          | CALLDATASIZE          | cds 0 0 0 0             | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 61 extra    | PUSH2 extra           | extra cds 0 0 0 0       | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 60 0x37     | PUSH1 0x37            | 0x37 extra 0 0 0 0            | [0, cds) = calldata // 0x37 (55) is runtime size - data
+                // 36          | CALLDATASIZE          | cds 0x37 extra 0 0 0 0        | [0, cds) = calldata
+                // 39          | CODECOPY              | 0 0 0 0                       | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 36          | CALLDATASIZE          | cds 0 0 0 0                   | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 61 extra    | PUSH2 extra           | extra cds 0 0 0 0             | [0, cds) = calldata, [cds, cds+extraData) = extraData
                 mstore(
                     add(ptr, 0x15),
                     0x6037363936610000000000000000000000000000000000000000000000000000
                 )
                 mstore(add(ptr, 0x1b), shl(240, extraLength))
 
-                // 01          | ADD                   | cds+extra 0 0 0 0       | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 3d          | RETURNDATASIZE        | 0 cds 0 0 0 0           | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0 0      | [0, cds) = calldata, [cds, cds+0x37) = extraData
+                // 01          | ADD                   | cds+extra 0 0 0 0             | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 3d          | RETURNDATASIZE        | 0 cds+extra 0 0 0 0           | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 73 addr     | PUSH20 0x123…         | addr 0 cds+extra 0 0 0 0      | [0, cds) = calldata, [cds, cds+extraData) = extraData
                 mstore(
                     add(ptr, 0x1d),
                     0x013d730000000000000000000000000000000000000000000000000000000000
                 )
                 mstore(add(ptr, 0x20), shl(0x60, implementation))
 
-                // 5a          | GAS                   | gas addr 0 cds 0 0 0 0  | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // f4          | DELEGATECALL          | success 0 0             | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 3d          | RETURNDATASIZE        | rds success 0 0         | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 3d          | RETURNDATASIZE        | rds rds success 0 0     | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 93          | SWAP4                 | 0 rds success 0 rds     | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 80          | DUP1                  | 0 0 rds success 0 rds   | [0, cds) = calldata, [cds, cds+0x37) = extraData
-                // 3e          | RETURNDATACOPY        | success 0 rds           | [0, rds) = return data (there might be some irrelevant leftovers in memory [rds, cds+0x37) when rds < cds+0x37)
-                // 60 0x35     | PUSH1 0x35            | 0x35 sucess 0 rds       | [0, rds) = return data
-                // 57          | JUMPI                 | 0 rds                   | [0, rds) = return data
-                // fd          | REVERT                | –                       | [0, rds) = return data
-                // 5b          | JUMPDEST              | 0 rds                   | [0, rds) = return data
-                // f3          | RETURN                | –                       | [0, rds) = return data
+                // 5a          | GAS                   | gas addr 0 cds+extra 0 0 0 0  | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // f4          | DELEGATECALL          | success 0 0                   | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 3d          | RETURNDATASIZE        | rds success 0 0               | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 3d          | RETURNDATASIZE        | rds rds success 0 0           | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 93          | SWAP4                 | 0 rds success 0 rds           | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 80          | DUP1                  | 0 0 rds success 0 rds         | [0, cds) = calldata, [cds, cds+extraData) = extraData
+                // 3e          | RETURNDATACOPY        | success 0 rds                 | [0, rds) = return data (there might be some irrelevant leftovers in memory [rds, cds+0x37) when rds < cds+0x37)
+                // 60 0x35     | PUSH1 0x35            | 0x35 sucess 0 rds             | [0, rds) = return data
+                // 57          | JUMPI                 | 0 rds                         | [0, rds) = return data
+                // fd          | REVERT                | –                             | [0, rds) = return data
+                // 5b          | JUMPDEST              | 0 rds                         | [0, rds) = return data
+                // f3          | RETURN                | –                             | [0, rds) = return data
                 mstore(
                     add(ptr, 0x34),
                     0x5af43d3d93803e603557fd5bf300000000000000000000000000000000000000
