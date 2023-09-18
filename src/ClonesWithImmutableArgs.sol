@@ -7,7 +7,8 @@ pragma solidity ^0.8.4;
 /// @notice Enables creating clone contracts with immutable args
 library ClonesWithImmutableArgs {
     /// @dev The CREATE3 proxy bytecode.
-    uint256 private constant _CREATE3_PROXY_BYTECODE = 0x67363d3d37363d34f03d5260086018f3;
+    uint256 private constant _CREATE3_PROXY_BYTECODE =
+        0x67363d3d37363d34f03d5260086018f3;
 
     /// @dev Hash of the `_CREATE3_PROXY_BYTECODE`.
     /// Equivalent to `keccak256(abi.encodePacked(hex"67363d3d37363d34f03d5260086018f3"))`.
@@ -160,10 +161,11 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return deployed The address of the created clone
-    function cloneDeterministic(address implementation, bytes memory data, bytes32 salt)
-        internal
-        returns (address deployed)
-    {
+    function cloneDeterministic(
+        address implementation,
+        bytes memory data,
+        bytes32 salt
+    ) internal returns (address deployed) {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
@@ -179,7 +181,10 @@ library ClonesWithImmutableArgs {
 
                 // 3d          | RETURNDATASIZE        | 0                       | –
                 // 61 runtime  | PUSH2 runtime (r)     | r 0                     | –
-                mstore(ptr, 0x3d61000000000000000000000000000000000000000000000000000000000000)
+                mstore(
+                    ptr,
+                    0x3d61000000000000000000000000000000000000000000000000000000000000
+                )
                 mstore(add(ptr, 0x02), shl(240, sub(creationSize, 11))) // size of the contract running bytecode (16 bits)
 
                 // creation size = 0b
@@ -189,7 +194,10 @@ library ClonesWithImmutableArgs {
                 // 39          | CODECOPY              | r 0                     | [0-2d]: runtime code
                 // 81          | DUP2                  | 0 c  0                  | [0-2d]: runtime code
                 // f3          | RETURN                | 0                       | [0-2d]: runtime code
-                mstore(add(ptr, 0x04), 0x80600b3d3981f300000000000000000000000000000000000000000000000000)
+                mstore(
+                    add(ptr, 0x04),
+                    0x80600b3d3981f300000000000000000000000000000000000000000000000000
+                )
 
                 // -------------------------------------------------------------------------------------------------------------
                 // RUNTIME
@@ -200,7 +208,10 @@ library ClonesWithImmutableArgs {
                 // 3d          | RETURNDATASIZE        | 0 0 cds                 | –
                 // 37          | CALLDATACOPY          | –                       | [0, cds] = calldata
                 // 61          | PUSH2 extra           | extra                   | [0, cds] = calldata
-                mstore(add(ptr, 0x0b), 0x363d3d3761000000000000000000000000000000000000000000000000000000)
+                mstore(
+                    add(ptr, 0x0b),
+                    0x363d3d3761000000000000000000000000000000000000000000000000000000
+                )
                 mstore(add(ptr, 0x10), shl(240, extraLength))
 
                 // 60 0x38     | PUSH1 0x38            | 0x38 extra              | [0, cds] = calldata // 0x38 (56) is runtime size - data
@@ -211,13 +222,19 @@ library ClonesWithImmutableArgs {
                 // 3d          | RETURNDATASIZE        | 0 0 0                   | [0, cds] = calldata
                 // 36          | CALLDATASIZE          | cds 0 0 0               | [0, cds] = calldata
                 // 61 extra    | PUSH2 extra           | extra cds 0 0 0         | [0, cds] = calldata
-                mstore(add(ptr, 0x12), 0x603836393d3d3d36610000000000000000000000000000000000000000000000)
+                mstore(
+                    add(ptr, 0x12),
+                    0x603836393d3d3d36610000000000000000000000000000000000000000000000
+                )
                 mstore(add(ptr, 0x1b), shl(240, extraLength))
 
                 // 01          | ADD                   | cds+extra 0 0 0         | [0, cds] = calldata
                 // 3d          | RETURNDATASIZE        | 0 cds 0 0 0             | [0, cds] = calldata
                 // 73 addr     | PUSH20 0x123…         | addr 0 cds 0 0 0        | [0, cds] = calldata
-                mstore(add(ptr, 0x1d), 0x013d730000000000000000000000000000000000000000000000000000000000)
+                mstore(
+                    add(ptr, 0x1d),
+                    0x013d730000000000000000000000000000000000000000000000000000000000
+                )
                 mstore(add(ptr, 0x20), shl(0x60, implementation))
 
                 // 5a          | GAS                   | gas addr 0 cds 0 0 0    | [0, cds] = calldata
@@ -235,7 +252,10 @@ library ClonesWithImmutableArgs {
                 // 5b          | JUMPDEST              | 0 rds                   | [0, rds] = return data
                 // f3          | RETURN                | –                       | [0, rds] = return data
 
-                mstore(add(ptr, 0x34), 0x5af43d82803e903d91603657fd5bf30000000000000000000000000000000000)
+                mstore(
+                    add(ptr, 0x34),
+                    0x5af43d82803e903d91603657fd5bf30000000000000000000000000000000000
+                )
             }
 
             // -------------------------------------------------------------------------------------------------------------
@@ -260,7 +280,7 @@ library ClonesWithImmutableArgs {
                 copyPtr += 32;
                 dataPtr += 32;
             }
-            uint256 mask = ~(256 ** (32 - counter) - 1);
+            uint256 mask = ~(256**(32 - counter) - 1);
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 mstore(copyPtr, and(mload(dataPtr), mask))
@@ -272,6 +292,7 @@ library ClonesWithImmutableArgs {
             }
 
             /// @solidity memory-safe-assembly
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 // Store the `_PROXY_BYTECODE` into scratch space.
                 mstore(0x00, _CREATE3_PROXY_BYTECODE)
@@ -321,7 +342,6 @@ library ClonesWithImmutableArgs {
                     // Revert with (offset, size).
                     revert(0x1c, 0x04)
                 }
-
             }
         }
     }
@@ -329,8 +349,13 @@ library ClonesWithImmutableArgs {
     /// @notice Returns the CREATE3 deterministic address of the contract deployed via cloneDeterministic().
     /// @dev Forked from https://github.com/Vectorized/solady/blob/main/src/utils/CREATE3.sol
     /// @param salt The salt used by the CREATE3 deployment
-    function predictDeterministic(bytes32 salt) internal view returns (address deployed) {
+    function predictDeterministic(bytes32 salt)
+        internal
+        view
+        returns (address deployed)
+    {
         /// @solidity memory-safe-assembly
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             // Cache the free memory pointer.
             let m := mload(0x40)

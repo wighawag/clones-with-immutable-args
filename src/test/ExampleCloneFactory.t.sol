@@ -95,19 +95,7 @@ contract ExampleCloneFactoryTest is DSTest {
         bytes32 salt
     ) public {
         // deploying with the same salt twice should trigger the InitializeFail() error
-        factory.createCloneDeterministic(
-            param1,
-            param2,
-            param3,
-            param4,
-            salt
-        );
-        factory.createCloneDeterministic(
-            param1,
-            param2,
-            param3,
-            param4,
-            salt
-        );
+        factory.createCloneDeterministic(param1, param2, param3, param4, salt);
+        factory.createCloneDeterministic(param1, param2, param3, param4, salt);
     }
 }
