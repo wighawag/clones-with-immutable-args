@@ -317,26 +317,24 @@ library ClonesWithImmutableArgs {
 
                 deployed := keccak256(0x1e, 0x17)
 
-                // If the `call` fails, revert.
-                if iszero(
-                    call(
-                        gas(), // Gas remaining.
-                        proxy, // Proxy's address.
-                        0, // Ether value.
-                        ptr, // Pointer to the creation code
-                        creationSize, // Size of the creation code
-                        0x00, // Offset of output.
-                        0x00 // Length of output.
+                // If the `call` fails or the code size of `deployed` is zero, revert.
+                // The second argument of the or() call is evaluated first, which is important
+                // here because extcodesize(deployed) is only non-zero after the call() to the proxy
+                // is made and the contract is successfully deployed.
+                if or(
+                    iszero(extcodesize(deployed)),
+                    iszero(
+                        call(
+                            gas(), // Gas remaining.
+                            proxy, // Proxy's address.
+                            0, // Ether value.
+                            ptr, // Pointer to the creation code
+                            creationSize, // Size of the creation code
+                            0x00, // Offset of output.
+                            0x00 // Length of output.
+                        )
                     )
                 ) {
-                    // Store the function selector of `InitializeFail()`.
-                    mstore(0x00, 0x8f86d2f1)
-                    // Revert with (offset, size).
-                    revert(0x1c, 0x04)
-                }
-
-                // If the code size of `deployed` is zero, revert.
-                if iszero(extcodesize(deployed)) {
                     // Store the function selector of `InitializeFail()`.
                     mstore(0x00, 0x8f86d2f1)
                     // Revert with (offset, size).
