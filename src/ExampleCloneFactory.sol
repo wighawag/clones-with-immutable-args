@@ -22,4 +22,24 @@ contract ExampleCloneFactory {
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
         clone = ExampleClone(address(implementation).clone(data));
     }
+    
+    function createClone2(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) external returns (ExampleClone clone) {
+        bytes memory data = abi.encodePacked(param1, param2, param3, param4);
+        clone = ExampleClone(address(implementation).clone2(data));
+    }
+
+    function predictAddress(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) external returns (address clone) {
+        bytes memory data = abi.encodePacked(param1, param2, param3, param4);
+        clone = address(implementation).predictAddress(data);
+    }
 }

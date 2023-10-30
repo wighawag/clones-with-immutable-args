@@ -3,10 +3,16 @@
 pragma solidity ^0.8.4;
 
 /// @title ClonesWithImmutableArgs
-/// @author wighawag, zefram.eth
+/// @author wighawag, zefram.eth, nick.eth
 /// @notice Enables creating clone contracts with immutable args
 library ClonesWithImmutableArgs {
     error CreateFail();
+
+    enum CloneType {
+        CREATE,
+        CREATE2,
+        PREDICT_CREATE2
+    }
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
@@ -17,6 +23,44 @@ library ClonesWithImmutableArgs {
         internal
         returns (address payable instance)
     {
+        return clone(implementation, data, CloneType.CREATE);
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args,
+    ///         using CREATE2
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @return instance The address of the created clone
+    function clone2(address implementation, bytes memory data)
+        internal
+        returns (address payable instance)
+    {
+        return clone(implementation, data, CloneType.CREATE2);
+    }
+
+    /// @notice Computes the address of a clone created using CREATE2
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @return instance The address of the clone
+    function predictAddress(address implementation, bytes memory data)
+        internal
+        returns (address payable instance)
+    {
+        return clone(implementation, data, CloneType.PREDICT_CREATE2);
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @param cloneType Whether to use CREATE or CREATE2 to create the clones
+    /// @return instance The address of the created clone
+    function clone(address implementation, bytes memory data, CloneType cloneType)
+        internal
+        returns (address payable instance)
+    {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
@@ -24,6 +68,7 @@ library ClonesWithImmutableArgs {
             uint256 runSize = creationSize - 10;
             uint256 dataPtr;
             uint256 ptr;
+
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 ptr := mload(0x40)
@@ -135,9 +180,30 @@ library ClonesWithImmutableArgs {
             assembly {
                 mstore(copyPtr, shl(240, extraLength))
             }
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                instance := create(0, ptr, creationSize)
+            if(cloneType == CloneType.CREATE) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    instance := create(0, ptr, creationSize)
+                }
+            } else if(cloneType == CloneType.CREATE2) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    instance := create2(0, ptr, creationSize, 0)
+                }
+            } else if(cloneType == CloneType.PREDICT_CREATE2) {
+                bytes32 bytecodeHash;
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    bytecodeHash := keccak256(ptr, creationSize)
+                }
+                instance = payable(address(uint160(uint(keccak256(abi.encodePacked(
+                    bytes1(0xff),
+                    address(this),
+                    bytes32(0),
+                    bytecodeHash
+                ))))));
+            } else {
+                revert CreateFail();
             }
             if (instance == address(0)) {
                 revert CreateFail();
