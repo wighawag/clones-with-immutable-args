@@ -161,7 +161,7 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return deployed The address of the created clone
-    function cloneDeterministic(
+    function clone3(
         address implementation,
         bytes memory data,
         bytes32 salt
@@ -347,7 +347,7 @@ library ClonesWithImmutableArgs {
     /// @notice Returns the CREATE3 deterministic address of the contract deployed via cloneDeterministic().
     /// @dev Forked from https://github.com/Vectorized/solady/blob/main/src/utils/CREATE3.sol
     /// @param salt The salt used by the CREATE3 deployment
-    function predictDeterministic(bytes32 salt)
+    function addressOfClone3(bytes32 salt)
         internal
         view
         returns (address deployed)
