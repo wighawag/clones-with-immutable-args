@@ -1,0 +1,8 @@
+# clones-with-immutable-args
+
+## 1.1.0
+
+### Minor Changes
+
+- Add ability to deploy clones at deterministic address using CREATE3
+
