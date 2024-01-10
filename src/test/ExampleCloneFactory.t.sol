@@ -76,7 +76,7 @@ contract ExampleCloneFactoryTest is DSTest {
         uint64 param3,
         uint8 param4
     ) public {
-        address predicted = factory.predictAddress(
+        address predicted = factory.addressOfClone2(
             param1,
             param2,
             param3,
