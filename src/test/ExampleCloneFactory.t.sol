@@ -30,6 +30,16 @@ contract ExampleCloneFactoryTest is DSTest {
         factory.createClone(param1, param2, param3, param4);
     }
 
+    function testGas_clone3(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4,
+        bytes32 salt
+    ) public {
+        factory.createClone3(param1, param2, param3, param4, salt);
+    }
+
     /// -----------------------------------------------------------------------
     /// Correctness tests
     /// -----------------------------------------------------------------------
@@ -63,6 +73,20 @@ contract ExampleCloneFactoryTest is DSTest {
             param2,
             param3,
             param4
+
+function testCorrectness_clone3(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4,
+        bytes32 salt
+    ) public {
+        ExampleClone clone = factory.createClone3(
+            param1,
+            param2,
+            param3,
+            param4,
+            salt
         );
         assertEq(clone.param1(), param1);
         assertEq(clone.param2(), param2);
@@ -89,5 +113,22 @@ contract ExampleCloneFactoryTest is DSTest {
             param4
         );
         assertEq(predicted, address(clone));
+        assertEq(address(clone), factory.addressOfClone3(salt));
+    }
+
+    /// -----------------------------------------------------------------------
+    /// Failure tests
+    /// -----------------------------------------------------------------------
+
+    function testFail_clone3_initializeFail(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4,
+        bytes32 salt
+    ) public {
+        // deploying with the same salt twice should trigger the InitializeFail() error
+        factory.createClone3(param1, param2, param3, param4, salt);
+        factory.createClone3(param1, param2, param3, param4, salt);
     }
 }
