@@ -41,6 +41,7 @@ contract ExampleCloneFactory {
     ) external view returns (address clone) {
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
         clone = address(implementation).addressOfClone2(data);
+    }
 
     function createClone3(
         address param1,
