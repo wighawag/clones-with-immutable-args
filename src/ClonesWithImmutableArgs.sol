@@ -3,7 +3,7 @@
 pragma solidity ^0.8.4;
 
 /// @title ClonesWithImmutableArgs
-/// @author wighawag, zefram.eth
+/// @author wighawag, zefram.eth, nick.eth
 /// @notice Enables creating clone contracts with immutable args
 library ClonesWithImmutableArgs {
     /// @dev The CREATE3 proxy bytecode.
@@ -18,6 +18,12 @@ library ClonesWithImmutableArgs {
     error CreateFail();
     error InitializeFail();
 
+    enum CloneType {
+        CREATE,
+        CREATE2,
+        PREDICT_CREATE2
+    }
+
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
     /// @param implementation The implementation contract to clone
@@ -27,6 +33,62 @@ library ClonesWithImmutableArgs {
         internal
         returns (address payable instance)
     {
+        bytes memory creationcode = getCreationBytecode(implementation, data);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            instance := create(0, add(creationcode, 0x20), mload(creationcode))
+        }
+        if (instance == address(0)) {
+            revert CreateFail();
+        }
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args,
+    ///         using CREATE2
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @return instance The address of the created clone
+    function clone2(address implementation, bytes memory data)
+        internal
+        returns (address payable instance)
+    {
+        bytes memory creationcode = getCreationBytecode(implementation, data);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            instance := create2(0, add(creationcode, 0x20), mload(creationcode), 0)
+        }
+        if (instance == address(0)) {
+            revert CreateFail();
+        }
+    }
+
+    /// @notice Computes the address of a clone created using CREATE2
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @return instance The address of the clone
+    function addressOfClone2(address implementation, bytes memory data)
+        internal
+        view
+        returns (address payable instance)
+    {
+        bytes memory creationcode = getCreationBytecode(implementation, data);
+        bytes32 bytecodeHash = keccak256(creationcode);
+        instance = payable(address(uint160(uint(keccak256(abi.encodePacked(
+            bytes1(0xff),
+            address(this),
+            bytes32(0),
+            bytecodeHash
+        ))))));
+    }
+
+    /// @notice Computes bytecode for a clone
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @return ret Creation bytecode for the clone contract
+    function getCreationBytecode(address implementation, bytes memory data) internal pure returns (bytes memory ret) {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
@@ -34,9 +96,13 @@ library ClonesWithImmutableArgs {
             uint256 runSize = creationSize - 10;
             uint256 dataPtr;
             uint256 ptr;
+
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                ptr := mload(0x40)
+                ret := mload(0x40)
+                mstore(ret, creationSize)
+                mstore(0x40, add(ret, creationSize))
+                ptr := add(ret, 0x20)
 
                 // -------------------------------------------------------------------------------------------------------------
                 // CREATION (10 bytes)
@@ -144,13 +210,6 @@ library ClonesWithImmutableArgs {
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 mstore(copyPtr, shl(240, extraLength))
-            }
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                instance := create(0, ptr, creationSize)
-            }
-            if (instance == address(0)) {
-                revert CreateFail();
             }
         }
     }

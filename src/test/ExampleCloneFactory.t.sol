@@ -62,6 +62,24 @@ contract ExampleCloneFactoryTest is DSTest {
         assertEq(clone.param4(), param4);
     }
 
+    function testCorrectness_clone2(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) public {
+        ExampleClone clone = factory.createClone2(
+            param1,
+            param2,
+            param3,
+            param4
+        );
+        assertEq(clone.param1(), param1);
+        assertEq(clone.param2(), param2);
+        assertEq(clone.param3(), param3);
+        assertEq(clone.param4(), param4);
+    }
+
     function testCorrectness_clone3(
         address param1,
         uint256 param2,
@@ -81,6 +99,27 @@ contract ExampleCloneFactoryTest is DSTest {
         assertEq(clone.param3(), param3);
         assertEq(clone.param4(), param4);
         assertEq(address(clone), factory.addressOfClone3(salt));
+    }
+
+    function testCorrectness_addressOfClone2(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) public {
+        address predicted = factory.addressOfClone2(
+            param1,
+            param2,
+            param3,
+            param4
+        );
+        ExampleClone clone = factory.createClone2(
+            param1,
+            param2,
+            param3,
+            param4
+        );
+        assertEq(predicted, address(clone));
     }
 
     /// -----------------------------------------------------------------------
