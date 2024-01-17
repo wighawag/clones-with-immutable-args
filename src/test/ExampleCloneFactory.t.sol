@@ -62,6 +62,24 @@ contract ExampleCloneFactoryTest is DSTest {
         assertEq(clone.param4(), param4);
     }
 
+    function testCorrectness_clone_value(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) public {
+        ExampleClone clone = factory.createClone{ value: 1 wei }(
+            param1,
+            param2,
+            param3,
+            param4
+        );
+        assertEq(clone.param1(), param1);
+        assertEq(clone.param2(), param2);
+        assertEq(clone.param3(), param3);
+        assertEq(clone.param4(), param4);
+    }
+
     function testCorrectness_clone2(
         address param1,
         uint256 param2,
@@ -69,6 +87,24 @@ contract ExampleCloneFactoryTest is DSTest {
         uint8 param4
     ) public {
         ExampleClone clone = factory.createClone2(
+            param1,
+            param2,
+            param3,
+            param4
+        );
+        assertEq(clone.param1(), param1);
+        assertEq(clone.param2(), param2);
+        assertEq(clone.param3(), param3);
+        assertEq(clone.param4(), param4);
+    }
+
+    function testCorrectness_clone2_value(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4
+    ) public {
+        ExampleClone clone = factory.createClone2{ value: 1 wei }(
             param1,
             param2,
             param3,
@@ -88,6 +124,27 @@ contract ExampleCloneFactoryTest is DSTest {
         bytes32 salt
     ) public {
         ExampleClone clone = factory.createClone3(
+            param1,
+            param2,
+            param3,
+            param4,
+            salt
+        );
+        assertEq(clone.param1(), param1);
+        assertEq(clone.param2(), param2);
+        assertEq(clone.param3(), param3);
+        assertEq(clone.param4(), param4);
+        assertEq(address(clone), factory.addressOfClone3(salt));
+    }
+
+    function testCorrectness_clone3_value(
+        address param1,
+        uint256 param2,
+        uint64 param3,
+        uint8 param4,
+        bytes32 salt
+    ) public {
+        ExampleClone clone = factory.createClone3{ value: 1 wei }(
             param1,
             param2,
             param3,

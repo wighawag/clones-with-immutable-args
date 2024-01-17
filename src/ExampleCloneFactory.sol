@@ -18,9 +18,9 @@ contract ExampleCloneFactory {
         uint256 param2,
         uint64 param3,
         uint8 param4
-    ) external returns (ExampleClone clone) {
+    ) external payable returns (ExampleClone clone) {
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
-        clone = ExampleClone(address(implementation).clone(data));
+        clone = ExampleClone(address(implementation).clone(data, msg.value));
     }
     
     function createClone2(
@@ -28,9 +28,9 @@ contract ExampleCloneFactory {
         uint256 param2,
         uint64 param3,
         uint8 param4
-    ) external returns (ExampleClone clone) {
+    ) external payable returns (ExampleClone clone) {
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
-        clone = ExampleClone(address(implementation).clone2(data));
+        clone = ExampleClone(address(implementation).clone2(data, msg.value));
     }
 
     function addressOfClone2(
@@ -49,9 +49,9 @@ contract ExampleCloneFactory {
         uint64 param3,
         uint8 param4,
         bytes32 salt
-    ) external returns (ExampleClone clone) {
+    ) external payable returns (ExampleClone clone) {
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
-        clone = ExampleClone(address(implementation).clone3(data, salt));
+        clone = ExampleClone(address(implementation).clone3(data, salt, msg.value));
     }
 
     function addressOfClone3(bytes32 salt) external view returns (address) {

@@ -33,10 +33,23 @@ library ClonesWithImmutableArgs {
         internal
         returns (address payable instance)
     {
+        return clone(implementation, data, 0);
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @param value The amount of wei to transfer to the created clone
+    /// @return instance The address of the created clone
+    function clone(address implementation, bytes memory data, uint256 value)
+        internal
+        returns (address payable instance)
+    {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            instance := create(0, add(creationcode, 0x20), mload(creationcode))
+            instance := create(value, add(creationcode, 0x20), mload(creationcode))
         }
         if (instance == address(0)) {
             revert CreateFail();
@@ -53,10 +66,24 @@ library ClonesWithImmutableArgs {
         internal
         returns (address payable instance)
     {
+        return clone2(implementation, data, 0);
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args,
+    ///         using CREATE2
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @param value The amount of wei to transfer to the created clone
+    /// @return instance The address of the created clone
+    function clone2(address implementation, bytes memory data, uint256 value)
+        internal
+        returns (address payable instance)
+    {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            instance := create2(0, add(creationcode, 0x20), mload(creationcode), 0)
+            instance := create2(value, add(creationcode, 0x20), mload(creationcode), 0)
         }
         if (instance == address(0)) {
             revert CreateFail();
@@ -219,11 +246,29 @@ library ClonesWithImmutableArgs {
     /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
+    /// @param salt The salt used by the CREATE3 deployment
     /// @return deployed The address of the created clone
     function clone3(
         address implementation,
         bytes memory data,
         bytes32 salt
+    ) internal returns (address deployed) {
+        return clone3(implementation, data, salt, 0);
+    }
+
+    /// @notice Creates a clone proxy of the implementation contract, with immutable args. Uses CREATE3
+    /// to implement deterministic deployment.
+    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @param salt The salt used by the CREATE3 deployment
+    /// @param value The amount of wei to transfer to the created clone
+    /// @return deployed The address of the created clone
+    function clone3(
+        address implementation,
+        bytes memory data,
+        bytes32 salt,
+        uint256 value
     ) internal returns (address deployed) {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
@@ -386,7 +431,7 @@ library ClonesWithImmutableArgs {
                         call(
                             gas(), // Gas remaining.
                             proxy, // Proxy's address.
-                            0, // Ether value.
+                            value, // Ether value.
                             ptr, // Pointer to the creation code
                             creationSize, // Size of the creation code
                             0x00, // Offset of output.
