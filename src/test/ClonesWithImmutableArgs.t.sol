@@ -31,7 +31,12 @@ contract ClonesWithImmutableArgsTest is DSTest {
         address implementation = address(new ExampleClone());
         uint256 remainderMask = ~(uint256(type(uint160).max));
         bytes memory data = abi.encodePacked(param1, param2, param3, param4);
-        address clone = ClonesWithImmutableArgs.clone3(implementation, data, salt, 0);
+        address clone = ClonesWithImmutableArgs.clone3(
+            implementation,
+            data,
+            salt,
+            0
+        );
 
         uint256 remainder;
         assembly ("memory-safe") {

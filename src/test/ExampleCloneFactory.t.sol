@@ -68,7 +68,7 @@ contract ExampleCloneFactoryTest is DSTest {
         uint64 param3,
         uint8 param4
     ) public {
-        ExampleClone clone = factory.createClone{ value: 1 wei }(
+        ExampleClone clone = factory.createClone{value: 1 wei}(
             param1,
             param2,
             param3,
@@ -104,7 +104,7 @@ contract ExampleCloneFactoryTest is DSTest {
         uint64 param3,
         uint8 param4
     ) public {
-        ExampleClone clone = factory.createClone2{ value: 1 wei }(
+        ExampleClone clone = factory.createClone2{value: 1 wei}(
             param1,
             param2,
             param3,
@@ -144,7 +144,7 @@ contract ExampleCloneFactoryTest is DSTest {
         uint8 param4,
         bytes32 salt
     ) public {
-        ExampleClone clone = factory.createClone3{ value: 1 wei }(
+        ExampleClone clone = factory.createClone3{value: 1 wei}(
             param1,
             param2,
             param3,

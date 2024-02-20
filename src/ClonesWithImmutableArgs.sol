@@ -29,10 +29,10 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the created clone
-    function clone(address implementation, bytes memory data)
-        internal
-        returns (address payable instance)
-    {
+    function clone(
+        address implementation,
+        bytes memory data
+    ) internal returns (address payable instance) {
         return clone(implementation, data, 0);
     }
 
@@ -42,14 +42,19 @@ library ClonesWithImmutableArgs {
     /// @param data Encoded immutable args
     /// @param value The amount of wei to transfer to the created clone
     /// @return instance The address of the created clone
-    function clone(address implementation, bytes memory data, uint256 value)
-        internal
-        returns (address payable instance)
-    {
+    function clone(
+        address implementation,
+        bytes memory data,
+        uint256 value
+    ) internal returns (address payable instance) {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            instance := create(value, add(creationcode, 0x20), mload(creationcode))
+            instance := create(
+                value,
+                add(creationcode, 0x20),
+                mload(creationcode)
+            )
         }
         if (instance == address(0)) {
             revert CreateFail();
@@ -62,10 +67,10 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the created clone
-    function clone2(address implementation, bytes memory data)
-        internal
-        returns (address payable instance)
-    {
+    function clone2(
+        address implementation,
+        bytes memory data
+    ) internal returns (address payable instance) {
         return clone2(implementation, data, 0);
     }
 
@@ -76,14 +81,20 @@ library ClonesWithImmutableArgs {
     /// @param data Encoded immutable args
     /// @param value The amount of wei to transfer to the created clone
     /// @return instance The address of the created clone
-    function clone2(address implementation, bytes memory data, uint256 value)
-        internal
-        returns (address payable instance)
-    {
+    function clone2(
+        address implementation,
+        bytes memory data,
+        uint256 value
+    ) internal returns (address payable instance) {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            instance := create2(value, add(creationcode, 0x20), mload(creationcode), 0)
+            instance := create2(
+                value,
+                add(creationcode, 0x20),
+                mload(creationcode),
+                0
+            )
         }
         if (instance == address(0)) {
             revert CreateFail();
@@ -95,19 +106,28 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the clone
-    function addressOfClone2(address implementation, bytes memory data)
-        internal
-        view
-        returns (address payable instance)
-    {
+    function addressOfClone2(
+        address implementation,
+        bytes memory data
+    ) internal view returns (address payable instance) {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         bytes32 bytecodeHash = keccak256(creationcode);
-        instance = payable(address(uint160(uint(keccak256(abi.encodePacked(
-            bytes1(0xff),
-            address(this),
-            bytes32(0),
-            bytecodeHash
-        ))))));
+        instance = payable(
+            address(
+                uint160(
+                    uint256(
+                        keccak256(
+                            abi.encodePacked(
+                                bytes1(0xff),
+                                address(this),
+                                bytes32(0),
+                                bytecodeHash
+                            )
+                        )
+                    )
+                )
+            )
+        );
     }
 
     /// @notice Computes bytecode for a clone
@@ -115,7 +135,10 @@ library ClonesWithImmutableArgs {
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return ret Creation bytecode for the clone contract
-    function getCreationBytecode(address implementation, bytes memory data) internal pure returns (bytes memory ret) {
+    function getCreationBytecode(
+        address implementation,
+        bytes memory data
+    ) internal pure returns (bytes memory ret) {
         // unrealistic for memory ptr or data length to exceed 256 bits
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
@@ -228,7 +251,7 @@ library ClonesWithImmutableArgs {
                 copyPtr += 32;
                 dataPtr += 32;
             }
-            uint256 mask = ~(256**(32 - counter) - 1);
+            uint256 mask = ~(256 ** (32 - counter) - 1);
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 mstore(copyPtr, and(mload(dataPtr), mask))
@@ -384,7 +407,7 @@ library ClonesWithImmutableArgs {
                 copyPtr += 32;
                 dataPtr += 32;
             }
-            uint256 mask = ~(256**(32 - counter) - 1);
+            uint256 mask = ~(256 ** (32 - counter) - 1);
             // solhint-disable-next-line no-inline-assembly
             assembly {
                 mstore(copyPtr, and(mload(dataPtr), mask))
@@ -419,7 +442,10 @@ library ClonesWithImmutableArgs {
                 // Nonce of the proxy contract (1).
                 mstore8(0x34, 0x01)
 
-                deployed := and(keccak256(0x1e, 0x17), 0xffffffffffffffffffffffffffffffffffffffff)
+                deployed := and(
+                    keccak256(0x1e, 0x17),
+                    0xffffffffffffffffffffffffffffffffffffffff
+                )
 
                 // If the `call` fails or the code size of `deployed` is zero, revert.
                 // The second argument of the or() call is evaluated first, which is important
@@ -451,11 +477,9 @@ library ClonesWithImmutableArgs {
     /// @notice Returns the CREATE3 deterministic address of the contract deployed via cloneDeterministic().
     /// @dev Forked from https://github.com/Vectorized/solady/blob/main/src/utils/CREATE3.sol
     /// @param salt The salt used by the CREATE3 deployment
-    function addressOfClone3(bytes32 salt)
-        internal
-        view
-        returns (address deployed)
-    {
+    function addressOfClone3(
+        bytes32 salt
+    ) internal view returns (address deployed) {
         /// @solidity memory-safe-assembly
         // solhint-disable-next-line no-inline-assembly
         assembly {
@@ -480,7 +504,10 @@ library ClonesWithImmutableArgs {
             // Nonce of the proxy contract (1).
             mstore8(0x34, 0x01)
 
-            deployed := and(keccak256(0x1e, 0x17), 0xffffffffffffffffffffffffffffffffffffffff)
+            deployed := and(
+                keccak256(0x1e, 0x17),
+                0xffffffffffffffffffffffffffffffffffffffff
+            )
         }
     }
 }

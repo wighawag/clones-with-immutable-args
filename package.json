@@ -2,29 +2,30 @@
   "name": "clones-with-immutable-args",
   "author": "wighawag",
   "license": "BSD",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Factory for deploying clones with immutable parameters.",
   "files": [
     "*.sol"
   ],
   "devDependencies": {
     "copyfiles": "^2.4.1",
-    "prettier": "^2.4.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.18",
-    "rimraf": "^3.0.2",
-    "solhint": "^3.3.6",
-    "solhint-plugin-prettier": "^0.0.5"
+    "prettier": "^3.2.5",
+    "prettier-plugin-solidity": "^1.3.1",
+    "rimraf": "^5.0.5",
+    "solhint": "^4.1.1",
+    "solhint-plugin-prettier": "^0.1.0"
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "prepublishOnly": "copyfiles -u 1 \"./src/**/*.sol\" --exclude \"./src/test/**/*.sol\" ./",
     "postpublish": "rimraf ./*.sol",
-    "prepack": "yarn prepublishOnly",
-    "postpack": "yarn postpublish",
-    "lint": "yarn prettier && yarn solhint",
-    "lint:check": "yarn prettier:check && yarn solhint:check",
-    "prettier": "yarn prettier:check --write",
+    "prepack": "pnpm prepublishOnly",
+    "postpack": "pnpm postpublish",
+    "lint": "pnpm prettier && pnpm solhint",
+    "lint:check": "pnpm prettier:check && pnpm solhint:check",
+    "prettier": "pnpm prettier:check --write",
     "prettier:check": "prettier --check \"src/**/*.sol\"",
-    "solhint": "yarn solhint:check --fix",
+    "solhint": "pnpm solhint:check --fix",
     "solhint:check": "solhint --config ./.solhint.json \"src/**/*.sol\""
   }
 }
