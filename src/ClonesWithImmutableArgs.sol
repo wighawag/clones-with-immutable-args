@@ -419,7 +419,7 @@ library ClonesWithImmutableArgs {
                 // Nonce of the proxy contract (1).
                 mstore8(0x34, 0x01)
 
-                deployed := keccak256(0x1e, 0x17)
+                deployed := and(keccak256(0x1e, 0x17), 0xffffffffffffffffffffffffffffffffffffffff)
 
                 // If the `call` fails or the code size of `deployed` is zero, revert.
                 // The second argument of the or() call is evaluated first, which is important
@@ -480,7 +480,7 @@ library ClonesWithImmutableArgs {
             // Nonce of the proxy contract (1).
             mstore8(0x34, 0x01)
 
-            deployed := keccak256(0x1e, 0x17)
+            deployed := and(keccak256(0x1e, 0x17), 0xffffffffffffffffffffffffffffffffffffffff)
         }
     }
 }
