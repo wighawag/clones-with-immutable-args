@@ -1,8 +1,35 @@
 # clones-with-immutable-args
 
+## 1.2.0
+
+### Minor Changes
+
+- Add an `addressOfClone2` overload taking the deployer, so a clone address can be predicted on behalf of a deployer other than the caller. The 2 argument version is unchanged and still predicts for `address(this)`
+- Add `MAX_CODE_SIZE` and a `DataTooLarge` error, and enforce the real limit on `data`. The documented limit of 65535 bytes was wrong: the proxy runtime is the proxy logic plus `data` plus the 2 byte length suffix and has to fit EIP-170, so the actual cap is 24519 bytes for `clone` and `clone2`, and 24518 for `clone3`. Oversized `data` now reverts with `DataTooLarge` instead of an opaque `CreateFail`
+
+### Patch Changes
+
+- Fix `getCreationBytecode` advancing the free memory pointer by `creationSize` rather than `creationSize + 0x20`, which left the last 32 bytes of the returned buffer above the free memory pointer, where the next allocation would silently overwrite it. Callers inside the library were unaffected because they all consume the buffer before allocating again
+- Read `uint256[]` immutable args with a single `calldatacopy` instead of one `calldataload` per element: about 10% cheaper at 8 elements and 25% at 32
+- Drop a redundant mask on the trailing partial word of the appended args, along with the out of bounds read it required when `data.length` was a multiple of 32
+- Raise `CreateFail` from assembly in `clone` and `clone2`, as `clone3` already did
+- Document that `clone2` is content addressed and deliberately takes no salt, so its address is a pure function of the deployer, the implementation and `data`, and redeploying an identical configuration reverts by design
+
+## 1.1.2
+
+### Patch Changes
+
+- Clean the `clone3` return value
+
+## 1.1.1
+
+### Minor Changes
+
+- Add `clone2` and `addressOfClone2` for CREATE2 deployment and address prediction
+- Allow a non-zero `msg.value` to be passed to the proxy constructor
+
 ## 1.1.0
 
 ### Minor Changes
 
 - Add ability to deploy clones at deterministic address using CREATE3
-
