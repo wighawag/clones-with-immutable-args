@@ -150,7 +150,6 @@ library ClonesWithImmutableArgs {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
             uint256 creationSize = 0x41 + extraLength;
             uint256 runSize = creationSize - 10;
-            uint256 dataPtr;
             uint256 ptr;
 
             // solhint-disable-next-line no-inline-assembly
@@ -246,34 +245,26 @@ library ClonesWithImmutableArgs {
             // -------------------------------------------------------------------------------------------------------------
 
             extraLength -= 2;
-            uint256 counter = extraLength;
-            uint256 copyPtr = ptr + 0x41;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                dataPtr := add(data, 32)
-            }
-            for (; counter >= 32; counter -= 32) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
+                // copy `data` a word at a time, then write its length as the
+                // 2 byte suffix.
+                //
+                // the trailing partial word is copied whole rather than
+                // masked: the bytes it drags in past the end of `data` occupy
+                // exactly the range the length suffix is about to overwrite,
+                // so masking them was redundant work.
+                let copyPtr := add(ptr, 0x41)
+                let dataPtr := add(data, 0x20)
+                let end := add(dataPtr, extraLength)
+
+                for {} lt(dataPtr, end) {} {
                     mstore(copyPtr, mload(dataPtr))
+                    copyPtr := add(copyPtr, 0x20)
+                    dataPtr := add(dataPtr, 0x20)
                 }
 
-                copyPtr += 32;
-                dataPtr += 32;
-            }
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                // mask off the bytes past the end of `data` in the final
-                // partial word. shifting is cheaper than the equivalent
-                // ~(256 ** (32 - counter) - 1), and does not depend on
-                // 256 ** 32 wrapping to zero to handle counter == 0
-                let mask := shl(shl(3, sub(32, counter)), not(0))
-                mstore(copyPtr, and(mload(dataPtr), mask))
-            }
-            copyPtr += counter;
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                mstore(copyPtr, shl(240, extraLength))
+                mstore(add(ptr, add(0x41, extraLength)), shl(240, extraLength))
             }
         }
     }
@@ -405,35 +396,22 @@ library ClonesWithImmutableArgs {
             // -------------------------------------------------------------------------------------------------------------
 
             extraLength -= 2;
-            uint256 counter = extraLength;
-            uint256 copyPtr = ptr + 0x43;
-            uint256 dataPtr;
             // solhint-disable-next-line no-inline-assembly
             assembly {
-                dataPtr := add(data, 32)
-            }
-            for (; counter >= 32; counter -= 32) {
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
+                // see getCreationBytecode: the trailing partial word is copied
+                // whole, since the bytes past the end of `data` are the ones
+                // the length suffix overwrites
+                let copyPtr := add(ptr, 0x43)
+                let dataPtr := add(data, 0x20)
+                let end := add(dataPtr, extraLength)
+
+                for {} lt(dataPtr, end) {} {
                     mstore(copyPtr, mload(dataPtr))
+                    copyPtr := add(copyPtr, 0x20)
+                    dataPtr := add(dataPtr, 0x20)
                 }
 
-                copyPtr += 32;
-                dataPtr += 32;
-            }
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                // mask off the bytes past the end of `data` in the final
-                // partial word. shifting is cheaper than the equivalent
-                // ~(256 ** (32 - counter) - 1), and does not depend on
-                // 256 ** 32 wrapping to zero to handle counter == 0
-                let mask := shl(shl(3, sub(32, counter)), not(0))
-                mstore(copyPtr, and(mload(dataPtr), mask))
-            }
-            copyPtr += counter;
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                mstore(copyPtr, shl(240, extraLength))
+                mstore(add(ptr, add(0x43, extraLength)), shl(240, extraLength))
             }
 
             /// @solidity memory-safe-assembly
