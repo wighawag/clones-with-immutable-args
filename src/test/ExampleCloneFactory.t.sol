@@ -6,6 +6,7 @@ import {DSTest} from "ds-test/test.sol";
 import {Hevm} from "./utils/Hevm.sol";
 import {ExampleClone} from "../ExampleClone.sol";
 import {ExampleCloneFactory} from "../ExampleCloneFactory.sol";
+import {ClonesWithImmutableArgs} from "../ClonesWithImmutableArgs.sol";
 
 contract ExampleCloneFactoryTest is DSTest {
     Hevm internal constant hevm = Hevm(HEVM_ADDRESS);
@@ -183,15 +184,18 @@ contract ExampleCloneFactoryTest is DSTest {
     /// Failure tests
     /// -----------------------------------------------------------------------
 
-    function testFail_clone3_initializeFail(
+    function test_RevertWhen_clone3SaltIsReused(
         address param1,
         uint256 param2,
         uint64 param3,
         uint8 param4,
         bytes32 salt
     ) public {
-        // deploying with the same salt twice should trigger the InitializeFail() error
         factory.createClone3(param1, param2, param3, param4, salt);
+
+        // deploying with the same salt twice fails: the CREATE3 proxy already
+        // exists at that address, so the inner CREATE2 returns the zero address
+        hevm.expectRevert(ClonesWithImmutableArgs.CreateFail.selector);
         factory.createClone3(param1, param2, param3, param4, salt);
     }
 }

@@ -1,7 +1,9 @@
 [profile.default]
 ffi = false
-fuzz_runs = 256
 optimizer = true
 optimizer_runs = 1000000
 remappings = ["ds-test/=lib/ds-test/src/"]
 verbosity = 1
+
+[fuzz]
+runs = 256

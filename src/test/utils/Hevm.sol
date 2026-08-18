@@ -11,5 +11,8 @@ abstract contract Hevm {
     // sets the slot loc of contract c to val
     function store(address c, bytes32 loc, bytes32 val) public virtual;
 
+    // expects the next call to revert with the given error selector
+    function expectRevert(bytes4 revertData) external virtual;
+
     function ffi(string[] calldata) external virtual returns (bytes memory);
 }
