@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-# ClonesWithImmutableArgs
+# clones-with-immutable-args
 
 Enables creating clone contracts with immutable arguments.
 
