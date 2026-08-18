@@ -1,5 +1,13 @@
 # clones-with-immutable-args
 
+## 2.0.0
+
+### Major Changes
+
+- `ClonesWithImmutableArgs.sol` now requires Solidity `^0.8.13`. Its two inline assembly blocks use the `assembly ("memory-safe")` dialect string instead of the `/// @solidity memory-safe-assembly` comment, which Solidity has deprecated and scheduled for removal. The comment form was only ever honoured from 0.8.13 onwards anyway, so nothing is lost below that version beyond a hint that was already inert. No function signature changed
+- `Clone.sol` deliberately still supports `^0.8.4`. It is what implementations inherit to read their immutable args and it carries no annotations, so contracts intended to be cloned are unaffected. Only factories need the newer compiler
+- If you are pinned below 0.8.13, stay on `1.2.0`, which carries the same fixes
+
 ## 1.2.0
 
 ### Minor Changes

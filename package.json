@@ -2,7 +2,7 @@
   "name": "clones-with-immutable-args",
   "author": "wighawag",
   "license": "BSD",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Factory for deploying clones with immutable parameters.",
   "files": [
     "*.sol"

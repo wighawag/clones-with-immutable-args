@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD
 
-pragma solidity ^0.8.4;
+// the memory-safe assembly dialect string requires 0.8.13. Clone.sol, which is
+// what implementations inherit, deliberately still supports ^0.8.4
+pragma solidity ^0.8.13;
 
 /// @title ClonesWithImmutableArgs
 /// @author wighawag, zefram.eth, nick.eth
@@ -484,9 +486,10 @@ library ClonesWithImmutableArgs {
                 mstore(add(ptr, add(0x43, extraLength)), shl(240, extraLength))
             }
 
-            /// @solidity memory-safe-assembly
+            // memory-safe: writes only scratch space [0x00, 0x40), and uses
+            // the region above the free memory pointer without moving it
             // solhint-disable-next-line no-inline-assembly
-            assembly {
+            assembly ("memory-safe") {
                 // Store the `_PROXY_BYTECODE` into scratch space.
                 mstore(0x00, _CREATE3_PROXY_BYTECODE)
                 // Deploy a new contract with our pre-made bytecode via CREATE2.
@@ -546,9 +549,10 @@ library ClonesWithImmutableArgs {
     function addressOfClone3(
         bytes32 salt
     ) internal view returns (address deployed) {
-        /// @solidity memory-safe-assembly
+        // memory-safe: confined to [0x00, 0x60), and the free memory pointer
+        // slot it overwrites is cached and restored before returning
         // solhint-disable-next-line no-inline-assembly
-        assembly {
+        assembly ("memory-safe") {
             // Cache the free memory pointer.
             let m := mload(0x40)
             // Store `address(this)`.

@@ -19,9 +19,17 @@ In other word, if you know you are not gonna need parametrization and just want 
 
 ## Status
 
-This library is stable and maintained on demand: it is not under active feature development, but issues and security reports are addressed. The API is settled and in production use, so there is no plan to break it.
+This library is stable and maintained on demand: it is not under active feature development, but issues and security reports are addressed. The API is settled and in production use: no function signature has changed since 1.x, and none is planned to.
 
 Note that the immutable args are appended to the **calldata** of every delegatecall, so an implementation inheriting `Clone.sol` reads them with a plain `calldataload`. This costs a small overhead on every call and makes arg reads very cheap. Other minimal-proxy libraries make different tradeoffs, including storing args in the runtime bytecode and reading them back with `extcodecopy`.
+
+### Compiler requirements
+
+`ClonesWithImmutableArgs.sol` requires Solidity **0.8.13 or newer**, because its inline assembly is annotated with the `memory-safe` dialect string, which lets the via-IR optimizer reason across those blocks.
+
+`Clone.sol` still supports **`^0.8.4`**. It is what a contract intended to be cloned inherits in order to read its immutable args, and it contains no assembly annotations, so implementations do not need a newer compiler than before. Only the factory side is affected.
+
+If you are pinned below 0.8.13, use `1.2.0`. It is the last release supporting `^0.8.4` throughout, and it contains the same fixes as 2.0.0.
 
 ## Usage
 
