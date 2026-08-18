@@ -17,6 +17,21 @@ contract CloneHarness {
     ) external returns (address) {
         return ClonesWithImmutableArgs.clone2(implementation, data);
     }
+
+    function clone(
+        address implementation,
+        bytes memory data
+    ) external returns (address) {
+        return ClonesWithImmutableArgs.clone(implementation, data);
+    }
+
+    function clone3(
+        address implementation,
+        bytes memory data,
+        bytes32 salt
+    ) external returns (address) {
+        return ClonesWithImmutableArgs.clone3(implementation, data, salt);
+    }
 }
 
 /// @notice Characterisation tests for immutable arg packing and reading.
@@ -195,7 +210,8 @@ contract CloneArgsTest is DSTest {
         assertEq(got.length, 3);
         // the packed element
         assertEq(got[0], 42);
-        // the length suffix (uint16(52)), left aligned, then past end of calldata
+        // the length suffix (uint16(52)), left aligned, then past the end of
+        // calldata
         assertEq(got[1], uint256(52) << 240);
         // entirely past the end of calldata
         assertEq(got[2], 0);
@@ -205,7 +221,8 @@ contract CloneArgsTest is DSTest {
     ///      must read back every arg for arg blobs either side of a word.
     function test_argsRoundTripAcrossWordBoundaries() public {
         for (uint64 arrLen = 0; arrLen < 4; arrLen++) {
-            bytes memory packed = abi.encodePacked(address(uint160(arrLen + 1)));
+            address head = address(uint160(arrLen + 1));
+            bytes memory packed = abi.encodePacked(head);
             for (uint64 i = 0; i < arrLen; i++) {
                 packed = abi.encodePacked(packed, uint256(i + 100));
             }
@@ -228,15 +245,98 @@ contract CloneArgsTest is DSTest {
     /// Failure mode
     /// -----------------------------------------------------------------------
 
-    /// @dev clone2 hardcodes the CREATE2 salt to 0, so redeploying the same
-    ///      implementation and data from the same deployer reverts. Pins the
+    /// @dev clone2 is content addressed and takes no salt by design, so a given
+    ///      implementation and data can exist at exactly one address per
+    ///      deployer. Redeploying an identical configuration reverting is that
+    ///      uniqueness invariant being enforced, not a failure mode. Pins the
     ///      exact selector, since the revert is raised from assembly.
-    function test_RevertWhen_clone2DataIsReused() public {
+    function test_RevertWhen_clone2ConfigurationIsReused() public {
         bytes memory packed = abi.encodePacked(address(this), uint64(1));
         harness.clone2(implementation, packed);
 
         hevm.expectRevert(ClonesWithImmutableArgs.CreateFail.selector);
         harness.clone2(implementation, packed);
+    }
+
+    /// @dev the same configuration deployed by a different deployer is a
+    ///      different address, so it does not collide
+    function test_clone2_isPerDeployer() public {
+        bytes memory packed = abi.encodePacked(address(this), uint64(1));
+        CloneHarness other = new CloneHarness();
+
+        address a = harness.clone2(implementation, packed);
+        address b = other.clone2(implementation, packed);
+
+        assertTrue(a != b);
+    }
+
+    /// -----------------------------------------------------------------------
+    /// Address prediction
+    /// -----------------------------------------------------------------------
+
+    function test_addressOfClone2_predictsForAnotherDeployer(
+        address head,
+        uint64 tail
+    ) public {
+        bytes memory packed = abi.encodePacked(head, tail);
+
+        address predicted = ClonesWithImmutableArgs.addressOfClone2(
+            implementation,
+            packed,
+            address(harness)
+        );
+        address actual = harness.clone2(implementation, packed);
+
+        assertEq(predicted, actual);
+    }
+
+    /// @dev the 2 argument overload must stay equivalent to passing the caller
+    function test_addressOfClone2_defaultsToCaller(bytes memory packed) public {
+        if (packed.length > 512) return;
+        assertEq(
+            ClonesWithImmutableArgs.addressOfClone2(implementation, packed),
+            ClonesWithImmutableArgs.addressOfClone2(
+                implementation,
+                packed,
+                address(this)
+            )
+        );
+    }
+
+    /// -----------------------------------------------------------------------
+    /// Size limit
+    /// -----------------------------------------------------------------------
+
+    /// @dev the runtime is the proxy logic (55 bytes) plus data plus the 2 byte
+    ///      length suffix, so the largest data that still fits EIP-170 is
+    ///      24576 - 57
+    function test_clone_acceptsDataAtTheLimit() public {
+        bytes memory data = new bytes(
+            ClonesWithImmutableArgs.MAX_CODE_SIZE - 57
+        );
+        address instance = harness.clone(implementation, data);
+        assertEq(
+            instance.code.length,
+            ClonesWithImmutableArgs.MAX_CODE_SIZE,
+            "runtime should be exactly at the EIP-170 limit"
+        );
+    }
+
+    function test_RevertWhen_dataExceedsTheLimit() public {
+        bytes memory data = new bytes(
+            ClonesWithImmutableArgs.MAX_CODE_SIZE - 56
+        );
+        hevm.expectRevert(ClonesWithImmutableArgs.DataTooLarge.selector);
+        harness.clone(implementation, data);
+    }
+
+    /// @dev clone3's prelude is one byte longer, so its limit is one lower
+    function test_RevertWhen_clone3DataExceedsTheLimit() public {
+        bytes memory data = new bytes(
+            ClonesWithImmutableArgs.MAX_CODE_SIZE - 57
+        );
+        hevm.expectRevert(ClonesWithImmutableArgs.DataTooLarge.selector);
+        harness.clone3(implementation, data, bytes32(uint256(1)));
     }
 
     /// -----------------------------------------------------------------------

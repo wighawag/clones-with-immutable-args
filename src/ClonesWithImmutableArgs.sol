@@ -15,8 +15,14 @@ library ClonesWithImmutableArgs {
     bytes32 private constant _CREATE3_PROXY_BYTECODE_HASH =
         0x21c35dbe1b344a2488cf3321d6ce542f8e9f305544ff09e4993a62319a497c1f;
 
+    /// @dev EIP-170's contract code size limit. The proxy runtime is the proxy
+    ///      logic, plus `data`, plus the 2 byte length suffix, so `data` is
+    ///      bounded well below the 65535 the 2 byte suffix could address.
+    uint256 internal constant MAX_CODE_SIZE = 24576;
+
     error CreateFail();
     error InitializeFail();
+    error DataTooLarge();
 
     enum CloneType {
         CREATE,
@@ -25,7 +31,10 @@ library ClonesWithImmutableArgs {
     }
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the created clone
@@ -37,7 +46,10 @@ library ClonesWithImmutableArgs {
     }
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @param value The amount of wei to transfer to the created clone
@@ -66,7 +78,18 @@ library ClonesWithImmutableArgs {
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args,
     ///         using CREATE2
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
+    /// @dev There is deliberately no salt. The clone is content addressed: its
+    ///      address is a pure function of the deployer, the implementation and
+    ///      `data`, so it can always be recomputed from its parameters without
+    ///      storing or coordinating a salt. A consequence is that deploying the
+    ///      same implementation and `data` twice from the same deployer reverts
+    ///      with CreateFail, which is the uniqueness guarantee being enforced,
+    ///      not a failure. Use `clone` or `clone3` when several clones should
+    ///      share the same immutable args.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the created clone
@@ -79,7 +102,12 @@ library ClonesWithImmutableArgs {
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args,
     ///         using CREATE2
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
+    /// @dev See the 2 argument overload: the clone is content addressed and
+    ///      takes no salt, so redeploying an identical configuration reverts.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @param value The amount of wei to transfer to the created clone
@@ -108,7 +136,13 @@ library ClonesWithImmutableArgs {
     }
 
     /// @notice Computes the address of a clone created using CREATE2
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
+    /// @dev Predicts for `address(this)` as the deployer, which is the common
+    ///      case of a factory predicting its own deployments. Use the 3
+    ///      argument overload to predict for another deployer.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return instance The address of the clone
@@ -116,6 +150,22 @@ library ClonesWithImmutableArgs {
         address implementation,
         bytes memory data
     ) internal view returns (address payable instance) {
+        return addressOfClone2(implementation, data, address(this));
+    }
+
+    /// @notice Computes the address of a clone created using CREATE2 by a given
+    ///         deployer
+    /// @dev The address is a pure function of `deployer`, `implementation` and
+    ///      `data`, so it can be computed for a deployer other than the caller.
+    /// @param implementation The implementation contract to clone
+    /// @param data Encoded immutable args
+    /// @param deployer The address that will call clone2
+    /// @return instance The address of the clone
+    function addressOfClone2(
+        address implementation,
+        bytes memory data,
+        address deployer
+    ) internal pure returns (address payable instance) {
         bytes memory creationcode = getCreationBytecode(implementation, data);
         bytes32 bytecodeHash = keccak256(creationcode);
         instance = payable(
@@ -125,7 +175,7 @@ library ClonesWithImmutableArgs {
                         keccak256(
                             abi.encodePacked(
                                 bytes1(0xff),
-                                address(this),
+                                deployer,
                                 bytes32(0),
                                 bytecodeHash
                             )
@@ -137,7 +187,10 @@ library ClonesWithImmutableArgs {
     }
 
     /// @notice Computes bytecode for a clone
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @return ret Creation bytecode for the clone contract
@@ -150,6 +203,13 @@ library ClonesWithImmutableArgs {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
             uint256 creationSize = 0x41 + extraLength;
             uint256 runSize = creationSize - 10;
+            // the runtime size is written into a 2 byte field, so without this
+            // check a large enough `data` would wrap it and deploy a truncated
+            // proxy. EIP-170 makes the deployment fail long before that point,
+            // so this mainly turns an opaque CreateFail into a clear error.
+            if (runSize > MAX_CODE_SIZE) {
+                revert DataTooLarge();
+            }
             uint256 ptr;
 
             // solhint-disable-next-line no-inline-assembly
@@ -271,7 +331,10 @@ library ClonesWithImmutableArgs {
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args. Uses CREATE3
     /// to implement deterministic deployment.
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @param salt The salt used by the CREATE3 deployment
@@ -286,7 +349,10 @@ library ClonesWithImmutableArgs {
 
     /// @notice Creates a clone proxy of the implementation contract, with immutable args. Uses CREATE3
     /// to implement deterministic deployment.
-    /// @dev data cannot exceed 65535 bytes, since 2 bytes are used to store the data length
+    /// @dev The proxy runtime is the proxy logic, plus `data`, plus a 2 byte
+    ///      length suffix, and must fit within EIP-170. Reverts with
+    ///      DataTooLarge otherwise, so the practical cap on `data` is a little
+    ///      under MAX_CODE_SIZE, not the 65535 the length suffix could address.
     /// @param implementation The implementation contract to clone
     /// @param data Encoded immutable args
     /// @param salt The salt used by the CREATE3 deployment
@@ -302,6 +368,10 @@ library ClonesWithImmutableArgs {
         unchecked {
             uint256 extraLength = data.length + 2; // +2 bytes for telling how much data there is appended to the call
             uint256 creationSize = 0x43 + extraLength;
+            // see getCreationBytecode. the CREATE3 prelude is 11 bytes
+            if (creationSize - 11 > MAX_CODE_SIZE) {
+                revert DataTooLarge();
+            }
             uint256 ptr;
             // solhint-disable-next-line no-inline-assembly
             assembly {
