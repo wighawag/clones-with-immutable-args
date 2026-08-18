@@ -151,7 +151,11 @@ library ClonesWithImmutableArgs {
             assembly {
                 ret := mload(0x40)
                 mstore(ret, creationSize)
-                mstore(0x40, add(ret, creationSize))
+                // the buffer spans [ret, ret + 0x20 + creationSize): the length
+                // word must be accounted for, otherwise the tail of `ret` sits
+                // above the free memory pointer and the next allocation
+                // silently overwrites it
+                mstore(0x40, add(add(ret, 0x20), creationSize))
                 ptr := add(ret, 0x20)
 
                 // -------------------------------------------------------------------------------------------------------------
