@@ -55,9 +55,12 @@ library ClonesWithImmutableArgs {
                 add(creationcode, 0x20),
                 mload(creationcode)
             )
-        }
-        if (instance == address(0)) {
-            revert CreateFail();
+
+            if iszero(instance) {
+                // revert CreateFail()
+                mstore(0x00, 0xebfef188)
+                revert(0x1c, 0x04)
+            }
         }
     }
 
@@ -95,9 +98,12 @@ library ClonesWithImmutableArgs {
                 mload(creationcode),
                 0
             )
-        }
-        if (instance == address(0)) {
-            revert CreateFail();
+
+            if iszero(instance) {
+                // revert CreateFail()
+                mstore(0x00, 0xebfef188)
+                revert(0x1c, 0x04)
+            }
         }
     }
 
@@ -255,9 +261,13 @@ library ClonesWithImmutableArgs {
                 copyPtr += 32;
                 dataPtr += 32;
             }
-            uint256 mask = ~(256 ** (32 - counter) - 1);
             // solhint-disable-next-line no-inline-assembly
             assembly {
+                // mask off the bytes past the end of `data` in the final
+                // partial word. shifting is cheaper than the equivalent
+                // ~(256 ** (32 - counter) - 1), and does not depend on
+                // 256 ** 32 wrapping to zero to handle counter == 0
+                let mask := shl(shl(3, sub(32, counter)), not(0))
                 mstore(copyPtr, and(mload(dataPtr), mask))
             }
             copyPtr += counter;
@@ -411,9 +421,13 @@ library ClonesWithImmutableArgs {
                 copyPtr += 32;
                 dataPtr += 32;
             }
-            uint256 mask = ~(256 ** (32 - counter) - 1);
             // solhint-disable-next-line no-inline-assembly
             assembly {
+                // mask off the bytes past the end of `data` in the final
+                // partial word. shifting is cheaper than the equivalent
+                // ~(256 ** (32 - counter) - 1), and does not depend on
+                // 256 ** 32 wrapping to zero to handle counter == 0
+                let mask := shl(shl(3, sub(32, counter)), not(0))
                 mstore(copyPtr, and(mload(dataPtr), mask))
             }
             copyPtr += counter;

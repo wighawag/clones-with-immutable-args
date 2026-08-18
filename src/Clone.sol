@@ -39,17 +39,14 @@ contract Clone {
         uint256 argOffset,
         uint64 arrLen
     ) internal pure returns (uint256[] memory arr) {
-        uint256 offset = _getImmutableArgsOffset();
-        uint256 el;
+        uint256 offset = _getImmutableArgsOffset() + argOffset;
         arr = new uint256[](arrLen);
-        for (uint64 i = 0; i < arrLen; i++) {
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                el := calldataload(add(add(offset, argOffset), mul(i, 32)))
-            }
-            arr[i] = el;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            // the array data region is exactly 32 * arrLen bytes, so it can be
+            // filled with a single copy instead of a load per element
+            calldatacopy(add(arr, 0x20), offset, shl(5, arrLen))
         }
-        return arr;
     }
 
     /// @notice Reads an immutable arg with type uint64
