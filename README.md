@@ -8,6 +8,12 @@ By doing so, the gas cost of creating parametrizable clones is reduced, since th
 
 In other word, if you know you are not gonna need parametrization and just want exact copies, then you can keep using EIP-1167, otherwise, clones-with-immutables is cheaper.
 
+## Status
+
+This library is stable and maintained on demand: it is not under active feature development, but issues and security reports are addressed. The API is settled and in production use, so there is no plan to break it.
+
+Note that the immutable args are appended to the **calldata** of every delegatecall, so an implementation inheriting `Clone.sol` reads them with a plain `calldataload`. This costs a small overhead on every call and makes arg reads very cheap. Other minimal-proxy libraries make different tradeoffs, including storing args in the runtime bytecode and reading them back with `extcodecopy`.
+
 ## Usage
 
 Clone factory contracts should use the [`ClonesWithImmutableArgs`](src/ClonesWithImmutableArgs.sol) library. `ClonesWithImmutableArgs.clone()` is the main function for creating clones.
