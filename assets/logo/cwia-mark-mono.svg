@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="currentColor" role="img" aria-label="clones with immutable args">
+  <title>clones with immutable args</title>
+  <desc>One-colour mark; the argument slots are cut out of the solid clone.</desc>
+  <g fill="none" stroke="currentColor" stroke-width="9" stroke-linejoin="round">
+    <path d="M88 28 32 128 88 228 144 128Z"/>
+    <path d="M168 28 112 128 168 228 224 128Z"/>
+  </g>
+  <path fill="currentColor" fill-rule="evenodd" d="M128 28 72 128 128 228 184 128Z M89 120 h16 a5 5 0 0 1 5 5 v6 a5 5 0 0 1 -5 5 h-16 a5 5 0 0 1 -5 -5 v-6 a5 5 0 0 1 5 -5Z M120 120 h16 a5 5 0 0 1 5 5 v6 a5 5 0 0 1 -5 5 h-16 a5 5 0 0 1 -5 -5 v-6 a5 5 0 0 1 5 -5Z M151 120 h16 a5 5 0 0 1 5 5 v6 a5 5 0 0 1 -5 5 h-16 a5 5 0 0 1 -5 -5 v-6 a5 5 0 0 1 5 -5Z"/>
+</svg>

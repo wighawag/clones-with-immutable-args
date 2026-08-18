@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="clones with immutable args">
+  <title>clones with immutable args</title>
+  <desc>Small-size cut: heavier strokes and one solid argument bar instead of three slots.</desc>
+  <g fill="none" stroke="#A79BF5" stroke-width="14" stroke-linejoin="round">
+    <path d="M84 34 34 128 84 222 134 128Z"/>
+    <path d="M172 34 122 128 172 222 222 128Z"/>
+  </g>
+  <path fill="#8B7CF0" d="M128 22 68 128 128 128Z"/>
+  <path fill="#5B49D8" d="M128 22 188 128 128 128Z"/>
+  <path fill="#8B7CF0" d="M128 234 68 128 128 128Z"/>
+  <path fill="#5B49D8" d="M128 234 188 128 128 128Z"/>
+  <rect x="82" y="116" width="92" height="24" rx="12" fill="#22C7D6"/>
+</svg>

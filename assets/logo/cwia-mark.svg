@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="clones with immutable args">
+  <title>clones with immutable args</title>
+  <desc>Three clones of one shape; the cyan belt is the immutable arguments carved into each copy.</desc>
+  <g fill="none" stroke="#A79BF5" stroke-width="9" stroke-linejoin="round">
+    <path d="M88 28 32 128 88 228 144 128Z"/>
+    <path d="M168 28 112 128 168 228 224 128Z"/>
+  </g>
+  <path fill="#8B7CF0" d="M128 28 72 128 128 128Z"/>
+  <path fill="#5B49D8" d="M128 28 184 128 128 128Z"/>
+  <path fill="#8B7CF0" d="M128 228 72 128 128 128Z"/>
+  <path fill="#5B49D8" d="M128 228 184 128 128 128Z"/>
+  <g fill="#22C7D6">
+    <rect x="84" y="120" width="26" height="16" rx="5"/>
+    <rect x="115" y="120" width="26" height="16" rx="5"/>
+    <rect x="146" y="120" width="26" height="16" rx="5"/>
+  </g>
+</svg>
