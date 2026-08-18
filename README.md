@@ -1,10 +1,19 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/cwia-wordmark-dark.svg">
+    <img alt="clones with immutable args" src="assets/logo/cwia-wordmark.svg" width="420">
+  </picture>
+</p>
+
 # ClonesWithImmutableArgs
 
 Enables creating clone contracts with immutable arguments.
 
 The immutable arguments are stored in the code region of the created proxy contract, and whenever the proxy is called, it reads the arguments into memory, and then appends them to the calldata of the delegate call to the implementation contract. The implementation contract can thus read the arguments straight from calldata.
 
-By doing so, the gas cost of creating parametrizable clones is reduced, since there's no need to store the parameters in storage, which you need to do with [EIP-1167](https://eips.ethereum.org/EIPS/eip-1167). The cost of using such clones is also reduced, since storage loads are replaced with calldata reading, which is far cheaper.
+By doing so, the gas cost of creating parametrizable clones is reduced. An [EIP-1167](https://eips.ethereum.org/EIPS/eip-1167) clone shares its implementation's code, so its immutables are fixed when the implementation is deployed and cannot differ per clone: the only way to parametrize one is storage, which means paying to write the parameters at creation and to load them on every call. Here the parameters live in the clone's own code instead, so there is no storage write at creation, and reads are calldata reads.
+
+Note the comparison is against a _parametrized_ EIP-1167 clone, not against `immutable` variables on a regular contract. Solidity immutables are read from code and are already cheap, but they are the same for every clone of a given implementation, which is exactly what this library exists to work around.
 
 In other word, if you know you are not gonna need parametrization and just want exact copies, then you can keep using EIP-1167, otherwise, clones-with-immutables is cheaper.
 
