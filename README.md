@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/cwia-wordmark-dark.svg">
-    <img alt="clones with immutable args" src="assets/logo/cwia-wordmark.svg" width="420">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wighawag/clones-with-immutable-args/master/assets/logo/cwia-wordmark-dark.svg">
+    <img alt="clones with immutable args" src="https://raw.githubusercontent.com/wighawag/clones-with-immutable-args/master/assets/logo/cwia-wordmark.svg" width="420">
   </picture>
 </p>
 

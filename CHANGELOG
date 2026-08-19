@@ -1,5 +1,13 @@
 # clones-with-immutable-args
 
+## 2.0.1
+
+### Patch Changes
+
+- Point the README logo at absolute URLs. npm does not rewrite relative paths, and `assets/` is not part of the published package, so the logo could never render on the npm page
+- Add `repository`, `homepage` and `bugs`, so npm links back to the source, and add `keywords` for search
+- Correct `license` from `BSD` to the valid SPDX identifier `BSD-3-Clause`, matching the LICENSE file. The licence itself is unchanged
+
 ## 2.0.0
 
 ### Major Changes

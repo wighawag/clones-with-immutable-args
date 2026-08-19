@@ -1,9 +1,30 @@
 {
   "name": "clones-with-immutable-args",
-  "author": "wighawag",
-  "license": "BSD",
-  "version": "2.0.0",
+  "author": "wighawag (https://github.com/wighawag)",
+  "license": "BSD-3-Clause",
+  "version": "2.0.1",
   "description": "Factory for deploying clones with immutable parameters.",
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "evm",
+    "smart-contracts",
+    "proxy",
+    "minimal-proxy",
+    "clone",
+    "eip-1167",
+    "immutable-args",
+    "create2",
+    "create3"
+  ],
+  "homepage": "https://github.com/wighawag/clones-with-immutable-args#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wighawag/clones-with-immutable-args.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wighawag/clones-with-immutable-args/issues"
+  },
   "files": [
     "*.sol"
   ],
