@@ -1,14 +1,22 @@
 # clones-with-immutable-args
 
+## 2.0.2
+
+### Patch Changes
+
+- Correct the `SPDX-License-Identifier` header of every `.sol` file from `BSD` to `BSD-3-Clause`. 2.0.1 corrected this in `package.json` but not in the sources, leaving the two disagreeing, so 2.0.1 is superseded. `BSD` is not a valid SPDX identifier, so licence scanners and Etherscan verification could not resolve it. The licence itself is unchanged: the LICENSE file has always been BSD 3-Clause.
+
+  Note this changes the licence string embedded in the compiler metadata, so the metadata hash appended to consumers' compiled bytecode changes with it. Contracts that inherit `Clone` will therefore have different bytecode, and any CREATE2 address derived from that bytecode will move. Done now, while 2.0.x is new enough to have effectively no users, rather than later when it would disrupt someone
+
+- `2.0.0` and `2.0.1` are deprecated on npm in favour of this release
+
 ## 2.0.1
 
 ### Patch Changes
 
 - Point the README logo at absolute URLs. npm does not rewrite relative paths, and `assets/` is not part of the published package, so the logo could never render on the npm page
 - Add `repository`, `homepage` and `bugs`, so npm links back to the source, and add `keywords` for search
-- Correct the licence identifier from `BSD` to the valid SPDX identifier `BSD-3-Clause`, in `package.json` and in the `SPDX-License-Identifier` header of every `.sol` file. `BSD` is not a valid SPDX identifier, so npm, licence scanners and Etherscan verification could not resolve it. The licence itself is unchanged: the LICENSE file has always been BSD 3-Clause.
-
-  Note this changes the licence string embedded in the compiler metadata, so the metadata hash appended to consumers' compiled bytecode changes with it. Contracts that inherit `Clone` will therefore have different bytecode, and any CREATE2 address derived from that bytecode will move. Done now, while 2.0.x is new enough to have effectively no users, rather than later when it would disrupt someone
+- Correct `license` in `package.json` from `BSD` to `BSD-3-Clause`. The `.sol` sources were missed and still said `BSD`, which 2.0.2 fixes
 
 ## 2.0.0
 

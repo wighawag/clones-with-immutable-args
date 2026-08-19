@@ -2,7 +2,7 @@
   "name": "clones-with-immutable-args",
   "author": "wighawag (https://github.com/wighawag)",
   "license": "BSD-3-Clause",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Factory for deploying clones with immutable parameters.",
   "keywords": [
     "solidity",
