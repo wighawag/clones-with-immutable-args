@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD
+// SPDX-License-Identifier: BSD-3-Clause
 
 // the memory-safe assembly dialect string requires 0.8.13. Clone.sol, which is
 // what implementations inherit, deliberately still supports ^0.8.4
